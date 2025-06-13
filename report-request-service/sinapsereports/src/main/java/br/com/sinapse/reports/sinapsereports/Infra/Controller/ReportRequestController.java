@@ -18,7 +18,6 @@ import br.com.sinapse.reports.sinapsereports.Application.UseCase.ReportRequestSe
 public class ReportRequestController {
 
     private final ReportRequestServiceUseCase reportRequestService;
-
     private final ReportMapper reportMapper;
 
     public ReportRequestController(ReportRequestServiceUseCase reportRequestService, ReportMapper reportMapper) {
@@ -28,19 +27,10 @@ public class ReportRequestController {
 
     @PostMapping
     public CompletableFuture<ResponseEntity<ReportRequestResponseDto>> createReportRequest(
-            @RequestBody(required = false) CreateReportRequestDto requestDto) {
+            @RequestBody CreateReportRequestDto requestDto) {
 
-        if (requestDto == null) {
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().build());
-        }
-
-        var reportRequest = reportMapper.toEntity(requestDto);
-
-        return reportRequestService.requestNewReport(reportRequest)
-                .thenApply(ResponseEntity::ok)
-                .exceptionally(ex -> {
-                    return ResponseEntity.status(500).body(null);
-                });
+        return reportRequestService.requestNewReport(reportMapper.toEntity(requestDto))
+                .thenApply(ResponseEntity::ok);
     }
 
 }

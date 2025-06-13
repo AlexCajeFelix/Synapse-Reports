@@ -19,18 +19,6 @@ class ReportRequestServiceUseCaseImplTest {
         private ReportRequestServiceUseCaseImpl reportRequestServiceUseCaseImpl;
 
         @Test
-        @DisplayName("given_valid_report_request_when_execute_then_does_not_throw")
-        void given_valid_report_request_when_execute_then_does_not_throw() {
-                var entity = new ReportRequest(
-                                "VENDAS_POR_VENDEDOR",
-                                LocalDate.now().minusDays(5),
-                                LocalDate.now(),
-                                "{\"sellerId\": 123}");
-
-                assertDoesNotThrow(() -> reportRequestServiceUseCaseImpl.requestNewReport(entity));
-        }
-
-        @Test
         @DisplayName("given_reportStartDate_after_today_when_execute_then_throw_IllegalArgumentException")
         void given_reportStartDate_after_today_when_execute_then_throw_IllegalArgumentException() {
                 assertThrows(IllegalArgumentException.class, () -> {

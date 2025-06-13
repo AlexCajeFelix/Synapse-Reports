@@ -1,44 +1,71 @@
-# Configurações Gerais da Aplicação
 server:
   port: 8081
+
 spring:
   application:
-    name: report-request-service 
+    name: report-request-service
+
   threads:
     virtual:
-      enabled: true 
-
+      enabled: true
 
   datasource:
     url: jdbc:mysql://localhost:3306/sinapse_reports?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: root
 
-
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-
   cloud:
     stream:
       bindings:
         publishReportRequest-out-0:
-          destination: report-requests 
+          destination: report-requests
           content-type: application/json
+          producer:
+            error-channel-enabled: true
 
-    
       kafka:
         binder:
           brokers: localhost:9092
           auto-create-topics: false
-          idempotent: true
-          
-         
           producer-properties:
-            acks: all 
-            retries: 3
-          
-          health-check-interval: 10s 
-          health-check-timeout: 5s  
+            acks: all
+            max.block.ms: 1000
+            retries: 2
+            delivery.timeout.ms: 15000
+            request.timeout.ms: 5000
+            enable.idempotence: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      myCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+
+      publish-kafka: 
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+
+  retry:
+    instances:
+      myRetry:
+        maxAttempts: 3
+        waitDuration: 1s
+
+  ratelimiter:
+    instances:
+      myRateLimiter:
+        limitForPeriod: 5
+        limitRefreshPeriod: 10s
+        timeoutDuration: 1s

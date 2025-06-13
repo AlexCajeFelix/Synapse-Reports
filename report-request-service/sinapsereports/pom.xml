@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
                              https://maven.apache.org/xsd/maven-4.0.0.xsd">
-                             
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -47,6 +47,17 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- AOP para Resilience4j -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+    <groupId>org.awaitility</groupId>
+    <artifactId>awaitility</artifactId>
+    <version>4.2.0</version> <scope>test</scope>
+</dependency>
+
         <!-- Flyway -->
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -63,21 +74,7 @@
             <artifactId>spring-cloud-starter-stream-kafka</artifactId>
         </dependency>
 
-       
-<dependency>
-    <groupId>org.springframework.kafka</groupId>
-    <artifactId>spring-kafka-test</artifactId>
-    <scope>test</scope>
-</dependency>
-
-
-        <!-- Runtime -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
+        <!-- MySQL driver -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
@@ -91,10 +88,31 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Resilience4j Spring Boot 3 -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <!-- Devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Testes -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -115,7 +133,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin Jacoco Corrigido -->
+            <!-- Jacoco -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -123,46 +141,39 @@
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
+                        <goals><goal>prepare-agent</goal></goals>
                     </execution>
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
+                        <goals><goal>report</goal></goals>
                     </execution>
                     <execution>
                         <id>check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
+                        <goals><goal>check</goal></goals>
                         <configuration>
-  <rules>
-    <rule>
-      <element>CLASS</element>
-      <limits>
-        <limit>
-          <counter>INSTRUCTION</counter>
-          <value>COVEREDRATIO</value>
-          <minimum>0.10</minimum>
-        </limit>
-        <limit>
-          <counter>BRANCH</counter>
-          <value>COVEREDRATIO</value>
-          <minimum>0.10</minimum>
-        </limit>
-      </limits>
-      <excludes>
-        <exclude>br.com.sinapse.reports.sinapsereports.SinapsereportsApplication</exclude>
-        <exclude>br.com.sinapse.reports.sinapsereports.Infra.Controller.ReportRequestController</exclude>
-      </excludes>
-    </rule>
-  </rules>
-</configuration>
-
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.10</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.10</minimum>
+                                        </limit>
+                                    </limits>
+                                    <excludes>
+                                        <exclude>br.com.sinapse.reports.sinapsereports.SinapsereportsApplication</exclude>
+                                        <exclude>br.com.sinapse.reports.sinapsereports.Infra.Controller.ReportRequestController</exclude>
+                                    </excludes>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

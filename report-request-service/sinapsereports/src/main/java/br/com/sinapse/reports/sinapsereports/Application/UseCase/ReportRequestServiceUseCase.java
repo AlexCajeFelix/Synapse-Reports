@@ -6,5 +6,9 @@ import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestRespo
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 
 public interface ReportRequestServiceUseCase {
-    CompletableFuture<ReportRequestResponseDto> requestNewReport(ReportRequest reportRequest);
+
+    CompletableFuture<ReportRequestResponseDto> requestNewReport(ReportRequest request);
+
+    CompletableFuture<Void> publishToKafka(ReportRequest request);
+
 }
