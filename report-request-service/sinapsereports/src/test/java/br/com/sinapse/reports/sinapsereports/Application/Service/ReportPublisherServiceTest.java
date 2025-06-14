@@ -1,20 +1,23 @@
 package br.com.sinapse.reports.sinapsereports.Application.Service;
 
 import br.com.sinapse.reports.sinapsereports.Application.ReportRequestFactory;
-import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
-// Importe sua factory
+
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.function.StreamBridge;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -29,153 +32,107 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@TestPropertySource(properties = "my.scheduler.delay=1000")
+@ActiveProfiles("test")
 class ReportPublisherServiceTest {
 
     @MockBean
-    private StreamBridge streamBridge;
-
+    private StreamBridge stream_bridge;
     @MockBean
-    private ReportRepository reportRepository;
-
+    private ReportRepository report_repository;
     @MockBean
-    private ReportMapper reportMapper;
+    private ReportMapper report_mapper;
 
-    @SpyBean
-    private ReportPublisherService reportPublisherService;
+    @Autowired
+    private ReportPublisherService report_publisher_service;
 
-    private ReportRequest reportRequest;
-    private ReportRequestResponseDto reportDto;
+    @Autowired
+    private CircuitBreakerRegistry circuit_breaker_registry;
+
+    private ReportRequest report_request;
 
     @BeforeEach
-    void setUp() {
-        // Arrange: Usando a factory para criar dados de teste consistentes.
-        reportRequest = ReportRequestFactory.criarReportRequestPdfEngenharia();
+    void set_up() {
+        reset(stream_bridge, report_repository, report_mapper);
+        circuit_breaker_registry.circuitBreaker("publish-kafka").reset();
 
-        reportDto = new ReportRequestResponseDto(
-                reportRequest.getId(),
-                ReportStatus.PENDING.name(),
-                "Request received");
-
-        when(reportMapper.toResponseDto(any(ReportRequest.class))).thenReturn(reportDto);
+        this.report_request = ReportRequestFactory.create_pdf_report_request_engineering();
+        when(report_mapper.toResponseDto(any(ReportRequest.class))).thenReturn(null);
+        when(report_repository.save(any(ReportRequest.class))).thenReturn(report_request);
     }
 
     @Test
-    @DisplayName("Deve publicar com sucesso e atualizar status para PENDING")
-    void given_successful_send_when_publish_then_status_is_updated_to_pending() throws Exception {
-        // When
-        reportPublisherService.publish(reportRequest).get();
+    @DisplayName("given valid request when publish then save entity with pending status")
+    void given_valid_request_when_publish_then_save_entity_with_pending_status() {
+        when(stream_bridge.send(anyString(), any())).thenReturn(true);
 
-        // Then
-        ArgumentCaptor<ReportRequest> requestCaptor = ArgumentCaptor.forClass(ReportRequest.class);
-        verify(streamBridge, times(1)).send(eq("publishReportRequest-out-0"), eq(reportDto));
-        verify(reportRepository, times(1)).save(requestCaptor.capture());
+        report_publisher_service.publish(report_request);
 
-        assertThat(requestCaptor.getValue().getStatus()).isEqualTo(ReportStatus.PENDING);
-        assertThat(requestCaptor.getValue().getId()).isEqualTo(reportRequest.getId());
+        verify(stream_bridge, timeout(1000).times(1)).send(eq("publishReportRequest-out-0"), any());
+
+        ArgumentCaptor<ReportRequest> captor = ArgumentCaptor.forClass(ReportRequest.class);
+        verify(report_repository, timeout(1000).times(1)).save(captor.capture());
+
+        ReportRequest saved_request = captor.getValue();
+        assertThat(saved_request.getStatus()).isEqualTo(ReportStatus.PENDING);
     }
 
     @Test
-    @DisplayName("Deve acionar o fallback quando a publicação no Kafka falhar")
-    void given_kafka_failure_when_publish_then_fallback_is_triggered() {
+    @DisplayName("given kafka failure when publish then save entity with pending_send status")
+    void given_kafka_failure_when_publish_then_save_entity_with_pending_send_status() {
+        doThrow(new RuntimeException("Kafka is offline")).when(stream_bridge).send(anyString(), any());
 
-        doThrow(new RuntimeException("Kafka is offline")).when(streamBridge).send(anyString(), any());
-
-        reportPublisherService.publish(reportRequest);
+        report_publisher_service.publish(report_request);
 
         ArgumentCaptor<ReportRequest> captor = ArgumentCaptor.forClass(ReportRequest.class);
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            verify(reportPublisherService, times(1)).handlePublishFailure(any(ReportRequest.class),
-                    any(Throwable.class));
-            verify(reportRepository, times(1)).save(captor.capture());
-        });
+        verify(report_repository, timeout(2000).times(1)).save(captor.capture());
 
-        assertThat(captor.getValue().getStatus()).isEqualTo(ReportStatus.PENDENTE_ENVIO);
+        ReportRequest saved_request = captor.getValue();
+        assertThat(saved_request.getStatus()).isEqualTo(ReportStatus.PENDENTE_ENVIO);
     }
 
     @Test
-    @DisplayName("NÃO deve acionar o fallback quando a publicação for bem-sucedida")
-    void given_successful_send_when_publish_then_fallback_is_not_invoked() throws Exception {
-        // When
-        reportPublisherService.publish(reportRequest).get();
+    @DisplayName("given repository failure on success path when publish then throw exception")
+    void given_repository_failure_on_success_path_when_publish_then_throw_exception() {
+        when(stream_bridge.send(anyString(), any())).thenReturn(true);
+        doThrow(new RuntimeException("DB is down")).when(report_repository).save(any(ReportRequest.class));
 
-        // Then
-        verify(reportPublisherService, never()).handlePublishFailure(any(), any());
-    }
-
-    @Test
-    @DisplayName("Deve atualizar o status e salvar no repositório corretamente")
-    void given_report_and_status_when_update_status_then_repository_saves_correct_state() {
-        // When
-        reportPublisherService.updateStatus(reportRequest, ReportStatus.PENDING);
-
-        // Then
-        ArgumentCaptor<ReportRequest> captor = ArgumentCaptor.forClass(ReportRequest.class);
-        verify(reportRepository).save(captor.capture());
-
-        assertThat(captor.getValue().getStatus()).isEqualTo(ReportStatus.PENDING);
-    }
-
-    @Test
-    @DisplayName("Deve atualizar status para PENDENTE_ENVIO ao chamar o fallback diretamente")
-    void given_report_and_error_when_handle_publish_failure_is_called_directly_then_status_is_pendente_envio() {
-        // Given
-        Throwable error = new RuntimeException("Simulated error");
-
-        // When
-        reportPublisherService.handlePublishFailure(reportRequest, error);
-
-        // Then
-        ArgumentCaptor<ReportRequest> captor = ArgumentCaptor.forClass(ReportRequest.class);
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> verify(reportRepository).save(captor.capture()));
-        assertThat(captor.getValue().getStatus()).isEqualTo(ReportStatus.PENDENTE_ENVIO);
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção se o repositório falhar durante uma publicação bem-sucedida")
-    void given_successful_send_but_repository_fails_when_publish_then_exception_is_thrown() {
-        // Given
-        doThrow(new RuntimeException("DB is down")).when(reportRepository).save(any());
-
-        // When / Then
-        assertThatThrownBy(() -> reportPublisherService.publish(reportRequest).get())
+        assertThatThrownBy(() -> report_publisher_service.publish(report_request).get())
                 .isInstanceOf(ExecutionException.class)
-                .hasCauseInstanceOf(RuntimeException.class)
+                .hasRootCauseInstanceOf(RuntimeException.class)
                 .hasMessageContaining("DB is down");
 
-        verify(streamBridge).send(anyString(), any());
+        verify(stream_bridge, timeout(1000).times(1)).send(eq("publishReportRequest-out-0"), any());
     }
 
     @Test
-    @DisplayName("Deve lançar exceção se o repositório falhar durante o acionamento do fallback")
-    void given_kafka_failure_and_repository_fails_when_fallback_is_triggered_then_exception_is_thrown() {
-        // Given
-        doThrow(new RuntimeException("Kafka down")).when(streamBridge).send(anyString(), any());
-        doThrow(new RuntimeException("DB is down")).when(reportRepository).save(any());
+    @DisplayName("given null request when publish then throw message publishing exception async")
+    void given_null_request_when_publish_then_throw_message_publishing_exception_async() {
+        CompletableFuture<Void> future = report_publisher_service.publish(null);
 
-        // When / Then
-        // A exceção do repositório vai vazar da thread do @Async
-        assertThatThrownBy(() -> reportPublisherService.publish(reportRequest).get());
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
+            assertThat(future).isCompletedExceptionally();
+        });
 
-        // Verificamos que o fallback foi chamado, mesmo que tenha falhado internamente.
-        await().atMost(5, TimeUnit.SECONDS)
-                .untilAsserted(() -> verify(reportPublisherService).handlePublishFailure(any(), any()));
+        assertThatThrownBy(() -> future.join())
+                .hasCauseInstanceOf(MessagePublishingException.class)
+                .hasRootCauseMessage("Solicitação nula. Nenhuma publicação realizada.");
+
+        verifyNoInteractions(stream_bridge, report_repository);
     }
 
     @Test
-    @DisplayName("Deve completar o Future com exceção se o ReportRequest for nulo")
-    void given_null_report_request_when_publish_then_future_completes_exceptionally() {
-        // When
-        CompletableFuture<Void> future = reportPublisherService.publish(null);
+    @DisplayName("given valid status when update_status then save entity with correct status")
+    void given_valid_status_when_update_status_then_save_entity_with_correct_status() {
+        ReportStatus new_status = ReportStatus.COMPLETED;
 
-        // Then
-        assertThat(future).isCompletedExceptionally();
+        report_publisher_service.updateStatus(report_request, new_status);
 
-        assertThatThrownBy(future::get)
-                .isInstanceOf(ExecutionException.class)
-                .hasCauseInstanceOf(IllegalArgumentException.class);
+        ArgumentCaptor<ReportRequest> captor = ArgumentCaptor.forClass(ReportRequest.class);
+        verify(report_repository).save(captor.capture());
 
-        verify(streamBridge, never()).send(any(), any());
-        verify(reportRepository, never()).save(any());
+        ReportRequest saved_request = captor.getValue();
+        assertThat(saved_request.getStatus()).isEqualTo(new_status);
     }
 }

@@ -1,3 +1,5 @@
+networks:
+  my_network:
 
 services:
   nginx:
@@ -5,9 +7,23 @@ services:
     container_name: nginx_gateway
     ports:
       - "81:80"
+    networks:
+      - my_network
+
+  app:
+    build: report-request-service/sinapsereports/
+    container_name: spring_app
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+      - kafka
+    networks:
+      - my_network
+    volumes:
+      - ./report-request-service/sinapsereports/:/app  
     
 
-    
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
     container_name: zookeeper
@@ -15,8 +31,9 @@ services:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - my_network
 
-  # Kafka: O seu broker de mensagens
   kafka:
     image: confluentinc/cp-kafka:7.3.2
     container_name: kafka
@@ -27,23 +44,26 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 # Correto para os seus serviços rodando no host
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - my_network
 
-  # MySQL: O seu banco de dados
   mysql:
     image: mysql:8.0
-    container_name: mysql_db_sinapse
+    container_name: mysql
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root # Use senhas mais fortes em produção
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: sinapse_reports
-      MYSQL_USER: user # Ótimo! Usar um utilizador dedicado é uma boa prática.
-      MYSQL_PASSWORD: root # Use senhas mais fortes em produção
-  
+      MYSQL_USER: user
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my_network
 
-# Definição dos volumes nomeados para persistência de dados
 volumes:
   mysql_data:

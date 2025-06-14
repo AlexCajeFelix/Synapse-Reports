@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,82 +21,77 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReportMapperTest {
 
     @InjectMocks
-    private ReportMapper reportMapper;
+    private ReportMapper report_mapper;
 
     @Test
-    @DisplayName("given valid DTO, when toEntity is called, then should return correctly mapped entity")
+    @DisplayName("given valid dto when to_entity then return correct entity")
     void given_valid_dto_when_to_entity_then_return_correct_entity() {
 
-        var createReportRequestDto = new CreateReportRequestDto(
+        var create_report_request_dto = new CreateReportRequestDto(
                 "SALES_BY_REGION",
                 LocalDate.of(2025, 1, 1),
                 LocalDate.of(2025, 1, 31),
                 "Brazil");
 
-        ReportRequest reportRequestEntity = reportMapper.toEntity(createReportRequestDto);
+        ReportRequest report_request_entity = report_mapper.toEntity(create_report_request_dto);
 
-        assertNotNull(reportRequestEntity);
-        assertEquals("SALES_BY_REGION", reportRequestEntity.getReportType());
-        assertEquals(LocalDate.of(2025, 1, 1), reportRequestEntity.getReportStartDate());
-        assertEquals(LocalDate.of(2025, 1, 31), reportRequestEntity.getReportEndDate());
-        assertEquals("Brazil", reportRequestEntity.getParameters());
-        assertEquals(ReportStatus.PENDING, reportRequestEntity.getStatus());
+        assertNotNull(report_request_entity);
+        assertEquals("SALES_BY_REGION", report_request_entity.getReportType());
+        assertEquals(LocalDate.of(2025, 1, 1), report_request_entity.getReportStartDate());
+        assertEquals(LocalDate.of(2025, 1, 31), report_request_entity.getReportEndDate());
+        assertEquals("Brazil", report_request_entity.getParameters());
+        assertEquals(ReportStatus.PENDING, report_request_entity.getStatus());
     }
 
     @Test
-    @DisplayName("given valid entity, when toResponseDto is called, then should return correctly mapped DTO")
+    @DisplayName("given valid entity when to_response_dto then return correct dto")
     void given_valid_entity_when_to_response_dto_then_return_correct_dto() {
-        // Given
-        var reportRequestEntity = new ReportRequest();
-        reportRequestEntity.setId(UUID.randomUUID());
-        reportRequestEntity.setStatus(ReportStatus.PENDING);
 
-        // When
-        ReportRequestResponseDto responseDto = reportMapper.toResponseDto(reportRequestEntity);
+        var report_request_entity = new ReportRequest();
+        report_request_entity.setId(UUID.randomUUID());
+        report_request_entity.setStatus(ReportStatus.PENDING);
 
-        // Then
-        assertNotNull(responseDto);
-        assertEquals(reportRequestEntity.getId(), responseDto.reportId());
-        assertEquals(ReportStatus.PENDING.toString(), responseDto.status());
-        assertNotNull(responseDto.message());
+        ReportRequestResponseDto response_dto = report_mapper.toResponseDto(report_request_entity);
+
+        assertNotNull(response_dto);
+        assertEquals(report_request_entity.getId(), response_dto.reportId());
+        assertEquals(ReportStatus.PENDING.toString(), response_dto.status());
+        assertNotNull(response_dto.message());
     }
 
     @Test
-    @DisplayName("given valid entity, when toEventDto is called, then should return correctly mapped event")
+    @DisplayName("given valid entity when to_event_dto then return correct event")
     void given_valid_entity_when_to_event_dto_then_return_correct_event() {
-        // Given
-        var reportRequestEntity = new ReportRequest();
-        reportRequestEntity.setId(UUID.randomUUID());
-        reportRequestEntity.setReportStartDate(LocalDate.of(2025, 6, 1));
-        reportRequestEntity.setReportEndDate(LocalDate.of(2025, 6, 30));
-        reportRequestEntity.setParameters("Brazil");
+        var report_request_entity = new ReportRequest();
+        report_request_entity.setId(UUID.randomUUID());
+        report_request_entity.setReportStartDate(LocalDate.of(2025, 6, 1));
+        report_request_entity.setReportEndDate(LocalDate.of(2025, 6, 30));
+        report_request_entity.setParameters("Brazil");
 
-        // When
-        ReportRequestedEvent eventDto = reportMapper.toEventDto(reportRequestEntity);
+        ReportRequestedEvent event_dto = report_mapper.toEventDto(report_request_entity);
 
-        // Then
-        assertNotNull(eventDto);
-        assertEquals(reportRequestEntity.getId(), eventDto.reportId());
-        assertEquals(LocalDate.of(2025, 6, 1), eventDto.reportStartDate());
-        assertEquals(LocalDate.of(2025, 6, 30), eventDto.reportEndDate());
-        assertEquals("Brazil", eventDto.parameters());
+        assertNotNull(event_dto);
+        assertEquals(report_request_entity.getId(), event_dto.reportId());
+        assertEquals(LocalDate.of(2025, 6, 1), event_dto.reportStartDate());
+        assertEquals(LocalDate.of(2025, 6, 30), event_dto.reportEndDate());
+        assertEquals("Brazil", event_dto.parameters());
     }
 
     @Test
-    @DisplayName("given null DTO, when toEntity is called, then should return null")
+    @DisplayName("given null dto when to_entity then return null")
     void given_null_dto_when_to_entity_then_return_null() {
-        assertNull(reportMapper.toEntity(null));
+        assertNull(report_mapper.toEntity(null));
     }
 
     @Test
-    @DisplayName("given null entity, when toResponseDto is called, then should return null")
+    @DisplayName("given null entity when to_response_dto then return null")
     void given_null_entity_when_to_response_dto_then_return_null() {
-        assertNull(reportMapper.toResponseDto(null));
+        assertNull(report_mapper.toResponseDto(null));
     }
 
     @Test
-    @DisplayName("given null entity, when toEventDto is called, then should return null")
+    @DisplayName("given null entity when to_event_dto then return null")
     void given_null_entity_when_to_event_dto_then_return_null() {
-        assertNull(reportMapper.toEventDto(null));
+        assertNull(report_mapper.toEventDto(null));
     }
 }

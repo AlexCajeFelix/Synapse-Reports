@@ -1,7 +1,9 @@
 package br.com.sinapse.reports.sinapsereports.Core.Entities;
 
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
-import br.com.sinapse.reports.sinapsereports.Domain.Validators.ReportRequestValidator;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Notification;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.ReportRequestValidator;
 
 import java.time.LocalDate;
 
@@ -12,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReportRequestTest {
 
     @Test
-    void create_validReportRequest_shouldPass() {
+    void create_valid_report_request_should_pass() {
         ReportRequest report = new ReportRequest(
                 "financial",
                 LocalDate.now().minusDays(5),
@@ -28,8 +30,8 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_nullReportType_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_null_report_type_should_throw() {
+        ReportRequestInvalidException ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 null,
                 LocalDate.now().minusDays(5),
                 LocalDate.now(),
@@ -38,8 +40,8 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_blankReportType_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_blank_report_type_should_throw() {
+        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 "  ",
                 LocalDate.now().minusDays(5),
                 LocalDate.now(),
@@ -48,8 +50,8 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_nullStartDate_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_null_start_date_should_throw() {
+        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 "type",
                 null,
                 LocalDate.now(),
@@ -58,8 +60,8 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_nullEndDate_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_null_end_date_should_throw() {
+        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 "type",
                 LocalDate.now().minusDays(5),
                 null,
@@ -68,8 +70,8 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_startDateAfterEndDate_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_start_date_after_end_date_should_throw() {
+        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 "type",
                 LocalDate.now(),
                 LocalDate.now().minusDays(1),
@@ -78,18 +80,18 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_startDateInFuture_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_start_date_in_future_should_throw() {
+        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 "type",
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(2),
                 "{}"));
-        assertEquals("Start date must not be in the future.", ex.getMessage());
+        assertTrue(ex.getMessage().contains("Start date must not be in the future."));
     }
 
     @Test
-    void create_endDateInFuture_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ReportRequest(
+    void create_end_date_in_future_should_throw() {
+        ReportRequestInvalidException ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
                 "type",
                 LocalDate.now().minusDays(2),
                 LocalDate.now().plusDays(1),
@@ -98,9 +100,12 @@ class ReportRequestTest {
     }
 
     @Test
-    void create_nullReportRequest_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> ReportRequestValidator.validate(null));
-        assertEquals("ReportRequest must not be null.", ex.getMessage());
+    void create_null_report_request_should_report_error() {
+        ReportRequestValidator validator = new ReportRequestValidator();
+        Notification<ReportRequest> notification = validator.validate(null);
+
+        assertTrue(notification.hasErrors());
+        assertTrue(notification.getErrors().stream()
+                .anyMatch(e -> e.getMessage().equals("ReportRequest must not be null.")));
     }
 }

@@ -4,20 +4,16 @@ server:
 spring:
   application:
     name: report-request-service
-
-  threads:
-    virtual:
-      enabled: true
+    profiles:
+      active: dev
 
   datasource:
-    url: jdbc:mysql://localhost:3306/sinapse_reports?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
+    url: jdbc:mysql://mysql:3306/sinapse_reports?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: user
     password: root
 
   kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: kafka:9092
 
   cloud:
     stream:
@@ -30,7 +26,7 @@ spring:
 
       kafka:
         binder:
-          brokers: localhost:9092
+          brokers: kafka:9092
           auto-create-topics: false
           producer-properties:
             acks: all
@@ -39,6 +35,10 @@ spring:
             delivery.timeout.ms: 15000
             request.timeout.ms: 5000
             enable.idempotence: true
+
+my:
+  scheduler:
+    delay: 10000
 
 resilience4j:
   circuitbreaker:
@@ -50,7 +50,7 @@ resilience4j:
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
 
-      publish-kafka: 
+      publish-kafka:
         registerHealthIndicator: true
         slidingWindowSize: 10
         minimumNumberOfCalls: 5

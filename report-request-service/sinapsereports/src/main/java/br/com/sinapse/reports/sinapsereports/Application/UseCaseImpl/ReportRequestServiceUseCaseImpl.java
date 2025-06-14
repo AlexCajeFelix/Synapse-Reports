@@ -7,7 +7,6 @@ import br.com.sinapse.reports.sinapsereports.Application.Service.ReportPublisher
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.ReportRequestServiceUseCase;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -40,10 +39,9 @@ public class ReportRequestServiceUseCaseImpl implements ReportRequestServiceUseC
     private static final Logger log = LoggerFactory.getLogger(ReportRequestServiceUseCaseImpl.class);
 
     @Override
-    @CircuitBreaker(name = "myCircuitBreaker", fallbackMethod = "handleKafkaFailure")
     public CompletableFuture<ReportRequestResponseDto> requestNewReport(ReportRequest request) {
 
-        reportPublisherService.updateStatus(request, ReportStatus.PENDING);
+        reportPublisherService.updateStatus(request, ReportStatus.PENDENTE_ENVIO);
 
         return self.publishToKafka(request)
                 .thenApplyAsync(aVoid -> reportMapper.toResponseDto(request)).exceptionally(
@@ -51,19 +49,17 @@ public class ReportRequestServiceUseCaseImpl implements ReportRequestServiceUseC
     }
 
     @Override
-    @CircuitBreaker(name = "myCircuitBreaker", fallbackMethod = "handleKafkaFailure")
     public CompletableFuture<Void> publishToKafka(ReportRequest request) {
         return reportPublisherService.publish(request);
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelayString = "${my.scheduler.delay}")
     public void resendPendingRequests() {
         var pendingRequests = reportRepository.findByStatus(ReportStatus.PENDENTE_ENVIO);
         if (pendingRequests.isEmpty()) {
             return;
         }
         log.info("Iniciando reenvio de {} solicitações pendentes.", pendingRequests.size());
-
         for (var req : pendingRequests) {
             try {
                 self.publishToKafka(req).get();

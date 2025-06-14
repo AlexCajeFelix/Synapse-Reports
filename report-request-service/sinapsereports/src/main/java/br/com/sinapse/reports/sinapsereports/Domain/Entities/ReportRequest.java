@@ -1,7 +1,9 @@
 package br.com.sinapse.reports.sinapsereports.Domain.Entities;
 
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.Domain.Validators.ReportRequestValidator;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Notification;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.ReportRequestValidator;
 import jakarta.persistence.*;
 import java.time.LocalDate; // Usaremos LocalDate para as datas do relatório
 import java.time.LocalDateTime;
@@ -43,8 +45,17 @@ public class ReportRequest {
         this.parameters = parameters;
         this.status = ReportStatus.PENDING;
         this.requestedAt = LocalDateTime.now();
+        validateSelf();
 
-        ReportRequestValidator.validate(this);
+    }
+
+    private void validateSelf() {
+        ReportRequestValidator validator = new ReportRequestValidator();
+        Notification<ReportRequest> notification = validator.validate(this);
+
+        if (notification.hasErrors()) {
+            throw new ReportRequestInvalidException(notification.messagesAsString());
+        }
     }
 
     public ReportRequest() {

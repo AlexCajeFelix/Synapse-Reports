@@ -1,0 +1,75 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: report-request-service
+    profiles:
+     active: dev
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
+    initialization-mode: always
+
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+my:
+  scheduler:
+    delay: 1000  
+
+  cloud:
+    stream:
+      bindings:
+        publishReportRequest-out-0:
+          destination: report-requests
+          content-type: application/json
+          producer:
+            error-channel-enabled: true
+
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: false
+          producer-properties:
+            acks: all
+            max.block.ms: 1000
+            retries: 1
+            delivery.timeout.ms: 5000
+            request.timeout.ms: 2000
+            enable.idempotence: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      myCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+
+      publish-kafka:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+
+  retry:
+    instances:
+      myRetry:
+        maxAttempts: 2
+        waitDuration: 500ms
+
+  ratelimiter:
+    instances:
+      myRateLimiter:
+        limitForPeriod: 10
+        limitRefreshPeriod: 5s
+        timeoutDuration: 500ms

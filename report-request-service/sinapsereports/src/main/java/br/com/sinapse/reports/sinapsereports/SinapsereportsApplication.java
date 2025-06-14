@@ -11,6 +11,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SinapsereportsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SinapsereportsApplication.class, args);
+		SpringApplication app = new SpringApplication(SinapsereportsApplication.class);
+		app.setAdditionalProfiles("prod");
+		app.run(args);
 	}
+
 }
