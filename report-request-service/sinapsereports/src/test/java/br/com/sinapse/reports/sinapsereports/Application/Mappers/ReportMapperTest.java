@@ -4,6 +4,7 @@ import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportReques
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEvent;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +29,7 @@ class ReportMapperTest {
     void given_valid_dto_when_to_entity_then_return_correct_entity() {
 
         var create_report_request_dto = new CreateReportRequestDto(
-                "SALES_BY_REGION",
+                ReportType.PDF,
                 LocalDate.of(2025, 1, 1),
                 LocalDate.of(2025, 1, 31),
                 "Brazil");
@@ -36,7 +37,7 @@ class ReportMapperTest {
         ReportRequest report_request_entity = report_mapper.toEntity(create_report_request_dto);
 
         assertNotNull(report_request_entity);
-        assertEquals("SALES_BY_REGION", report_request_entity.getReportType());
+        assertEquals(ReportType.PDF, report_request_entity.getReportType());
         assertEquals(LocalDate.of(2025, 1, 1), report_request_entity.getReportStartDate());
         assertEquals(LocalDate.of(2025, 1, 31), report_request_entity.getReportEndDate());
         assertEquals("Brazil", report_request_entity.getParameters());
@@ -55,7 +56,7 @@ class ReportMapperTest {
 
         assertNotNull(response_dto);
         assertEquals(report_request_entity.getId(), response_dto.reportId());
-        assertEquals(ReportStatus.PENDING.toString(), response_dto.status());
+        assertEquals(ReportStatus.PENDING, response_dto.status());
         assertNotNull(response_dto.message());
     }
 

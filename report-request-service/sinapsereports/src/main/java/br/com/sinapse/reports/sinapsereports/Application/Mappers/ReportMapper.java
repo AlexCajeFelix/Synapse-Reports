@@ -3,7 +3,9 @@ package br.com.sinapse.reports.sinapsereports.Application.Mappers; // Sugestão 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEvent;
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
 
 import org.springframework.stereotype.Component;
 
@@ -13,11 +15,20 @@ public class ReportMapper {
         if (dto == null) {
             return null;
         }
-        ReportRequest entity = new ReportRequest(
-                dto.reportType(),
-                dto.reportStartDate(),
-                dto.reportEndDate(),
-                dto.parameters());
+
+        if (dto.reportType() == null || dto.reportType().isEmpty() || dto.reportType().isBlank()) {
+            throw new ReportRequestInvalidException("Report type must not be null.");
+        }
+
+        var reportType = ReportType.valueOf(dto.reportType().toUpperCase());
+
+        ReportRequest entity = new ReportRequest();
+
+        entity.setReportType(reportType);
+
+        entity.setReportStartDate(dto.reportStartDate());
+        entity.setReportEndDate(dto.reportEndDate());
+        entity.setParameters(dto.parameters());
         return entity;
     }
 
@@ -27,7 +38,8 @@ public class ReportMapper {
         }
         return new ReportRequestResponseDto(
                 entity.getId(),
-                entity.getStatus().toString(),
+                entity.getReportType(),
+                entity.getStatus(),
                 "Seu pedido de relatório foi recebido e está na fila para processamento.");
     }
 
@@ -35,7 +47,8 @@ public class ReportMapper {
         if (entity == null) {
             return null;
         }
-        return new ReportRequestedEvent(entity.getId(), entity.getReportType(), entity.getReportStartDate(),
+        return new ReportRequestedEvent(entity.getId(), entity.getReportType(), entity.getStatus(),
+                entity.getReportStartDate(),
                 entity.getReportEndDate(), entity.getParameters(), entity.getRequestedAt());
 
     }

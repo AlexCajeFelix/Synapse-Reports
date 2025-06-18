@@ -31,6 +31,7 @@ import org.testcontainers.utility.DockerImageName;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -78,7 +79,7 @@ public class ReportRequestControllerTest {
     void create_report_when_kafka_is_up_should_return_pending() {
         when(streamBridge.send(anyString(), any())).thenReturn(true);
 
-        var dto = new CreateReportRequestDto("pdf", LocalDate.now().minusDays(2), LocalDate.now().minusDays(1),
+        var dto = new CreateReportRequestDto(ReportType.PDF, LocalDate.now().minusDays(2), LocalDate.now().minusDays(1),
                 "value");
         var request = new HttpEntity<>(dto, jsonHeaders());
         var url = "http://localhost:" + port + "/api/report-requests";
@@ -101,7 +102,8 @@ public class ReportRequestControllerTest {
     void create_report_when_kafka_is_down_should_return_pendente_envio_and_fallback() {
         doThrow(new RuntimeException("Simulando falha Kafka")).when(streamBridge).send(anyString(), any());
 
-        var dto = new CreateReportRequestDto("excel", LocalDate.now().minusDays(5), LocalDate.now(), "another_value");
+        var dto = new CreateReportRequestDto(ReportType.PDF, LocalDate.now().minusDays(5), LocalDate.now(),
+                "another_value");
         var request = new HttpEntity<>(dto, jsonHeaders());
         var url = "http://localhost:" + port + "/api/report-requests";
 

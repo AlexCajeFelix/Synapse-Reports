@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.AbstractValidator;
 
 @Component
@@ -17,9 +18,15 @@ public class ReportRequestValidator extends AbstractValidator<ReportRequest> {
             return;
         }
 
-        if (isBlank(target.getReportType())) {
+        if (target.getReportType() == null || isBlank(target.getReportType().name())) {
             addError("Report type must not be blank.");
         }
+
+        /*
+         * if (target.getStatus() == null || isBlank(target.getStatus().name())) {
+         * addError("Status must not be blank.");
+         * }
+         */
 
         if (target.getReportStartDate() == null || target.getReportEndDate() == null) {
             addError("Start and end dates must not be null.");

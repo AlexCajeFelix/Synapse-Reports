@@ -1,16 +1,20 @@
 package br.com.sinapse.reports.sinapsereports.Domain.Entities;
 
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Notification;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.ReportRequestValidator;
 import jakarta.persistence.*;
-import java.time.LocalDate; // Usaremos LocalDate para as datas do relatório
+import lombok.ToString;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "report_requests")
+@ToString
 public class ReportRequest {
 
     @Id
@@ -18,11 +22,10 @@ public class ReportRequest {
     private UUID id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ReportStatus status;
 
-    @Column(nullable = false)
-    private String reportType;
+    @Enumerated(EnumType.STRING)
+    private ReportType reportType;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime requestedAt;
@@ -33,17 +36,15 @@ public class ReportRequest {
     @Column(name = "report_end_date")
     private LocalDate reportEndDate;
 
-    @Column(nullable = false)
+    @Column(name = "parameters")
     private String parameters;
 
-    private LocalDateTime completedAt;
+    public ReportRequest(ReportType reportType, LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
 
-    public ReportRequest(String reportType, LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
         this.reportType = reportType;
         this.reportStartDate = reportStartDate;
         this.reportEndDate = reportEndDate;
         this.parameters = parameters;
-        this.status = ReportStatus.PENDING;
         this.requestedAt = LocalDateTime.now();
         validateSelf();
 
@@ -85,11 +86,11 @@ public class ReportRequest {
         this.status = status;
     }
 
-    public String getReportType() {
+    public ReportType getReportType() {
         return reportType;
     }
 
-    public void setReportType(String reportType) {
+    public void setReportType(ReportType reportType) {
         this.reportType = reportType;
     }
 
@@ -115,14 +116,6 @@ public class ReportRequest {
 
     public void setReportEndDate(LocalDate reportEndDate) {
         this.reportEndDate = reportEndDate;
-    }
-
-    public LocalDateTime getCompletedAt() {
-        return completedAt;
-    }
-
-    public void setCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
     }
 
 }

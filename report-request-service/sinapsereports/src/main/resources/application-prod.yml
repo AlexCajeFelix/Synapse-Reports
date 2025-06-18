@@ -8,7 +8,7 @@ spring:
       active: dev
 
   datasource:
-    url: jdbc:mysql://mysql:3306/sinapse_reports?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql_request:3306/sinapse_reports?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: user
     password: root
 
@@ -19,7 +19,7 @@ spring:
     stream:
       bindings:
         publishReportRequest-out-0:
-          destination: report-requests
+          destination: report-requests #Tópico 
           content-type: application/json
           producer:
             error-channel-enabled: true
@@ -39,6 +39,10 @@ spring:
 my:
   scheduler:
     delay: 10000
+
+channel: publishReportRequest-out-0
+     
+
 
 resilience4j:
   circuitbreaker:

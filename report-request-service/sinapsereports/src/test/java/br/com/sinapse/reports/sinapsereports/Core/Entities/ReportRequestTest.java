@@ -1,5 +1,6 @@
 package br.com.sinapse.reports.sinapsereports.Core.Entities;
 
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Notification;
@@ -16,12 +17,12 @@ class ReportRequestTest {
     @Test
     void create_valid_report_request_should_pass() {
         ReportRequest report = new ReportRequest(
-                "financial",
+                ReportType.PDF,
                 LocalDate.now().minusDays(5),
                 LocalDate.now(),
                 "{\"param\": \"value\"}");
 
-        assertEquals("financial", report.getReportType());
+        assertEquals(ReportType.PDF, report.getReportType());
         assertNotNull(report.getRequestedAt());
         assertEquals(LocalDate.now().minusDays(5), report.getReportStartDate());
         assertEquals(LocalDate.now(), report.getReportEndDate());
@@ -42,7 +43,7 @@ class ReportRequestTest {
     @Test
     void create_blank_report_type_should_throw() {
         var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "  ",
+                ReportType.valueOf(" "),
                 LocalDate.now().minusDays(5),
                 LocalDate.now(),
                 "{}"));
@@ -52,7 +53,7 @@ class ReportRequestTest {
     @Test
     void create_null_start_date_should_throw() {
         var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "type",
+                ReportType.PDF,
                 null,
                 LocalDate.now(),
                 "{}"));
@@ -62,7 +63,7 @@ class ReportRequestTest {
     @Test
     void create_null_end_date_should_throw() {
         var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "type",
+                ReportType.PDF,
                 LocalDate.now().minusDays(5),
                 null,
                 "{}"));
@@ -72,7 +73,7 @@ class ReportRequestTest {
     @Test
     void create_start_date_after_end_date_should_throw() {
         var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "type",
+                ReportType.PDF,
                 LocalDate.now(),
                 LocalDate.now().minusDays(1),
                 "{}"));
@@ -82,7 +83,7 @@ class ReportRequestTest {
     @Test
     void create_start_date_in_future_should_throw() {
         var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "type",
+                ReportType.PDF,
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(2),
                 "{}"));
@@ -92,7 +93,7 @@ class ReportRequestTest {
     @Test
     void create_end_date_in_future_should_throw() {
         ReportRequestInvalidException ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "type",
+                ReportType.PDF,
                 LocalDate.now().minusDays(2),
                 LocalDate.now().plusDays(1),
                 "{}"));

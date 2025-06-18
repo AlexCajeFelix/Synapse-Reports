@@ -1,6 +1,11 @@
 networks:
   my_network:
 
+volumes:
+  mysql_data_request:
+  mysql_data_generate:
+  rabbitmq_data:
+
 services:
   nginx:
     image: nginx:latest
@@ -10,19 +15,52 @@ services:
     networks:
       - my_network
 
-  app:
+  spring_app_request:
     build: report-request-service/sinapsereports/
-    container_name: spring_app
+    container_name: spring_app_request
     ports:
       - "8081:8081"
     depends_on:
-      - mysql
+      - mysql-request
+      - mysql-generate
       - kafka
+      - rabbitmq
     networks:
       - my_network
     volumes:
-      - ./report-request-service/sinapsereports/:/app  
-    
+      - ./report-request-service/sinapsereports/:/app
+
+  spring_app_generate:
+    build: report-generation-service/report-generate-service/
+    container_name: spring_app_generate
+    ports:
+      - "8089:8089"
+    depends_on:
+      - mysql-request
+      - mysql-generate
+      - kafka
+      - rabbitmq
+    networks:
+      - my_network
+    volumes:
+      - ./report-generation-service/report-generate-service/:/app
+
+  spring_app_notification-service:
+    build: notification-service/notification-service/
+    container_name: spring_app_notification_service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - mysql-request
+      - mysql-generate
+      - kafka
+      - rabbitmq
+    networks:
+      - my_network
+    volumes:
+      - ./notification-service/notification-service/:/app
+      - /home/alek/Desktop/Synapse Reports- back-end/report-generation-service/report-generate-service/downloads:/app/downloads:ro
+      # ^-- monta a pasta de downloads dentro do container em /app/downloads (só leitura)
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -50,9 +88,9 @@ services:
     networks:
       - my_network
 
-  mysql:
+  mysql-request:
     image: mysql:8.0
-    container_name: mysql
+    container_name: mysql_request
     ports:
       - "3306:3306"
     environment:
@@ -61,9 +99,32 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: root
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data_request:/var/lib/mysql
     networks:
       - my_network
 
-volumes:
-  mysql_data:
+  mysql-generate:
+    image: mysql:8.0
+    container_name: mysql_generate
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sinapse_reports_generated
+      MYSQL_USER: user
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data_generate:/var/lib/mysql
+    networks:
+      - my_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    
+      - "15672:15672"  
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - my_network
