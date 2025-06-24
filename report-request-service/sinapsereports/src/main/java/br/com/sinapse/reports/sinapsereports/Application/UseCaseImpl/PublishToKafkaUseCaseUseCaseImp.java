@@ -12,6 +12,7 @@ import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
 import br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.Fallback.FallBackPublishToKafkaUseCaseUseCaseImp;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
@@ -24,7 +25,6 @@ public class PublishToKafkaUseCaseUseCaseImp extends PublishToKafkaUseCase {
     private final FallBackPublishToKafkaUseCaseUseCaseImp fallBackPublishToKafkaUseCaseUseCaseImp;
     private final ManageStatusUseCaseImpl manageStatusUseCase;
     private final ReportRepository reportRepository;
-    private final ReportStatus PENDENTE_ENVIO = ReportStatus.PENDENTE_ENVIO;
 
     @Value("${channel}")
     private String channelName;
@@ -40,43 +40,44 @@ public class PublishToKafkaUseCaseUseCaseImp extends PublishToKafkaUseCase {
     }
 
     @Override
-    @Async("reportTaskExecutor")
     @CircuitBreaker(name = "publish-kafka", fallbackMethod = "sendToKafkaFallback")
     public void execute(final ReportRequest aReport) {
         try {
             sendToKafka(aReport);
-            manageStatusUseCase.execute(aReport, ReportStatus.PENDING);
 
         } catch (Exception e) {
-
-            System.out.println("deu errroooooo");
+            throw new MessagePublishingException("Erro ao publicar a solicitação: " + aReport.getId());
         }
 
     }
 
     @Async("reportTaskExecutor")
-
     public void sendToKafka(final ReportRequest reportRequest) {
         var eventDto = reportMapper.toEventDto(reportRequest);
+        boolean sent;
 
-        aStreamBridge.send(channelName, eventDto);
+        sent = aStreamBridge.send(channelName, eventDto);
+        if (!sent) {
+            throw new MessagePublishingException("Kafka não aceitou a mensagem: " + reportRequest.getId());
+        }
+
         log.info("Solicitação {} publicada com sucesso.", reportRequest.getId());
-
+        manageStatusUseCase.execute(reportRequest, ReportStatus.PENDING);
     }
 
     @Async("reportTaskExecutor")
     public void sendToKafkaFallback(final ReportRequest aReport, final Throwable e) {
-        System.out.println("deu errroooooo");
+        log.error("Erro ao publicar a solicitação: {}", aReport.getId(), e);
 
         fallBackPublishToKafkaUseCaseUseCaseImp.execute(aReport);
     }
 
     @Scheduled(fixedDelayString = "${my.scheduler.delay}")
-    @Async("reportTaskExecutor")
     public void resendPendingRequests() {
-        var pendingRequests = reportRepository.findByStatus(PENDENTE_ENVIO);
+        var pendingRequests = reportRepository.findByStatus(ReportStatus.FAILED);
 
         if (pendingRequests.isEmpty()) {
+            log.info("Nenhuma solicitação pendente para reenvio.");
             return;
         }
 

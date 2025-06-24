@@ -9,12 +9,11 @@ import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import jakarta.validation.constraints.NotBlank;
 
 public record ReportRequestedEvent(
-
-        @NotBlank UUID reportId,
-        @NotBlank ReportType reportType,
-        @NotBlank ReportStatus status,
-        @NotBlank LocalDate reportStartDate,
-        @NotBlank LocalDate reportEndDate,
-        @NotBlank String parameters,
-        @NotBlank LocalDateTime requestedAt) {
+                @NotBlank UUID reportId,
+                @NotBlank ReportType reportType,
+                @NotBlank ReportStatus status,
+                @NotBlank LocalDate reportStartDate,
+                @NotBlank LocalDate reportEndDate,
+                @NotBlank String parameters,
+                @NotBlank LocalDateTime requestedAt) {
 }

@@ -6,6 +6,7 @@ import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.R
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Notification;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.ReportRequestValidator;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "report_requests")
 @ToString
+@AllArgsConstructor
 public class ReportRequest {
 
     @Id
@@ -39,9 +41,10 @@ public class ReportRequest {
     @Column(name = "parameters")
     private String parameters;
 
-    public ReportRequest(ReportType reportType, LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
+    public ReportRequest(String reportType, LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
 
-        this.reportType = reportType;
+        this.reportType = ReportType.from(reportType)
+                .orElseThrow(() -> new ReportRequestInvalidException("Report type must not be null."));
         this.reportStartDate = reportStartDate;
         this.reportEndDate = reportEndDate;
         this.parameters = parameters;
@@ -51,9 +54,8 @@ public class ReportRequest {
     }
 
     private void validateSelf() {
-        ReportRequestValidator validator = new ReportRequestValidator();
+        ReportRequestValidator validator = new ReportRequestValidator(); // ACOPLANDO FORTEMENTE
         Notification<ReportRequest> notification = validator.validate(this);
-
         if (notification.hasErrors()) {
             throw new ReportRequestInvalidException(notification.messagesAsString());
         }

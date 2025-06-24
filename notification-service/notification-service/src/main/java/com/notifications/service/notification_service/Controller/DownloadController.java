@@ -76,6 +76,7 @@ public class DownloadController {
                                 "attachment; filename=\"" + resource.getFilename() + "\"")
                         .body(resource);
             } else {
+
                 // Se o arquivo não existe ou não pode ser lido, retorna 404 Not Found
                 System.out.println("Arquivo não encontrado ou inacessível: " + fileName);
                 return ResponseEntity.notFound().build();

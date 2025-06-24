@@ -20,4 +20,5 @@ public abstract class AbstractValidator<T> implements Validator<T> {
     }
 
     protected abstract void doValidate(T target);
+
 }

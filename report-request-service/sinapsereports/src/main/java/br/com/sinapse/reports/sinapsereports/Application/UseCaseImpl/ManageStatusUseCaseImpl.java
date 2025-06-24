@@ -24,7 +24,6 @@ public class ManageStatusUseCaseImpl extends ManageStatusUseCase {
     @Override
     public void execute(ReportRequest request, ReportStatus status) {
 
-        // TODO Tratar melhor o erro
         if (request == null || status == null) {
             throw new MessagePublishingException("Solicitação nula. Nenhuma publicação realizada.");
         }

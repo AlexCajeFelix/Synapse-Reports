@@ -22,12 +22,6 @@ public class ReportRequestValidator extends AbstractValidator<ReportRequest> {
             addError("Report type must not be blank.");
         }
 
-        /*
-         * if (target.getStatus() == null || isBlank(target.getStatus().name())) {
-         * addError("Status must not be blank.");
-         * }
-         */
-
         if (target.getReportStartDate() == null || target.getReportEndDate() == null) {
             addError("Start and end dates must not be null.");
         } else {

@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
@@ -12,6 +13,7 @@ import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.CreateReportUseCase;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
 
 @Service
 public class CreateReportUseCaseImpl extends CreateReportUseCase {
@@ -30,11 +32,18 @@ public class CreateReportUseCaseImpl extends CreateReportUseCase {
     }
 
     @Override
+    @Async("reportTaskExecutor")
     public CompletableFuture<ReportRequestResponseDto> execute(ReportRequest reportRequest) {
-        manageStatusUseCase.execute(reportRequest, ReportStatus.PENDENTE_ENVIO);
+        manageStatusUseCase.execute(reportRequest, ReportStatus.PENDING_SEND);
         log.info("Solicitação {} criada com sucesso.", reportRequest.getId());
-        return CompletableFuture.runAsync(() -> publishToKafkaUseCaseUseCase.execute(reportRequest))
-                .thenApply(v -> reportMapper.toResponseDto(reportRequest));
+
+        return CompletableFuture.supplyAsync(() -> {
+            publishToKafkaUseCaseUseCase.execute(reportRequest);
+            return reportMapper.toResponseDto(reportRequest);
+        }).exceptionally(ex -> {
+            log.error("Erro ao publicar no Kafka: {}", ex.getMessage());
+            throw new MessagePublishingException("Falha ao enviar para o Kafka");
+        });
     }
 
 }

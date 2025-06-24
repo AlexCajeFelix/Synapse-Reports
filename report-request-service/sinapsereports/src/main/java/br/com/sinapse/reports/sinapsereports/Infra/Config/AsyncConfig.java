@@ -2,13 +2,8 @@ package br.com.sinapse.reports.sinapsereports.Infra.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
-
 import java.util.concurrent.Executor;
 
 @Configuration
@@ -30,12 +25,6 @@ public class AsyncConfig {
         executor.initialize();
 
         return executor;
-    }
-
-    @Bean
-    public KafkaTemplate<String, ReportRequestResponseDto> kafkaTemplate(
-            ProducerFactory<String, ReportRequestResponseDto> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
     }
 
 }

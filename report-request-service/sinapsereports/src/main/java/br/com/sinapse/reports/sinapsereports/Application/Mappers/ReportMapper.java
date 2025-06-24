@@ -3,33 +3,24 @@ package br.com.sinapse.reports.sinapsereports.Application.Mappers; // Sugestão 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEvent;
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
-import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
 
 import org.springframework.stereotype.Component;
 
 @Component
 public class ReportMapper {
     public ReportRequest toEntity(CreateReportRequestDto dto) {
+
         if (dto == null) {
             return null;
         }
-
-        if (dto.reportType() == null || dto.reportType().isEmpty() || dto.reportType().isBlank()) {
-            throw new ReportRequestInvalidException("Report type must not be null.");
-        }
-
-        var reportType = ReportType.valueOf(dto.reportType().toUpperCase());
-
-        ReportRequest entity = new ReportRequest();
-
-        entity.setReportType(reportType);
-
-        entity.setReportStartDate(dto.reportStartDate());
-        entity.setReportEndDate(dto.reportEndDate());
-        entity.setParameters(dto.parameters());
+        ReportRequest entity = new ReportRequest(
+                dto.reportType(),
+                dto.reportStartDate(),
+                dto.reportEndDate(),
+                dto.parameters());
         return entity;
+
     }
 
     public ReportRequestResponseDto toResponseDto(ReportRequest entity) {

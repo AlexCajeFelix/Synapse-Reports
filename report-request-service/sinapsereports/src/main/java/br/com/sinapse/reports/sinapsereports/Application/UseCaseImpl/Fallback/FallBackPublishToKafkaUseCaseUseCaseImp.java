@@ -15,7 +15,7 @@ import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 public class FallBackPublishToKafkaUseCaseUseCaseImp {
 
     private final ManageStatusUseCaseImpl manageStatusUseCase;
-    private final ReportStatus PENDENTE_ENVIO = ReportStatus.PENDENTE_ENVIO;
+    private final ReportStatus FAILED = ReportStatus.FAILED;
 
     private static final Logger log = LoggerFactory.getLogger(FallBackPublishToKafkaUseCaseUseCaseImp.class);
 
@@ -28,7 +28,7 @@ public class FallBackPublishToKafkaUseCaseUseCaseImp {
     public void execute(final ReportRequest aReport) {
         log.info("Fallback salvando a info no banco de dados como pendente de envio para a solicitação {} ",
                 aReport.getId());
-        manageStatusUseCase.execute(aReport, PENDENTE_ENVIO);
+        manageStatusUseCase.execute(aReport, FAILED);
     }
 
 }

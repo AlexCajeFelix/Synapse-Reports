@@ -1,75 +1,80 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   application:
     name: report-request-service
     profiles:
-     active: dev
+      active: test
 
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
     username: sa
-    password: sa
-    initialization-mode: always
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 10
+      max-lifetime: 1800000
+      connection-timeout: 30000
 
   kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-my:
-  scheduler:
-    delay: 1000  
+    bootstrap-servers: localhost:9093     # Porta inválida para erro rápido
 
   cloud:
     stream:
       bindings:
-        publishReportRequest-out-0:
-          destination: report-requests
+        publishReportRequestTest-out-0:
+          destination: report-requests-test
           content-type: application/json
           producer:
             error-channel-enabled: true
-
+            sync: true
       kafka:
         binder:
-          brokers: localhost:9092
+          brokers: localhost:9093         # Porta inválida para forçar erro
           auto-create-topics: false
           producer-properties:
             acks: all
-            max.block.ms: 1000
-            retries: 1
-            delivery.timeout.ms: 5000
-            request.timeout.ms: 2000
-            enable.idempotence: true
+            max.block.ms: 5                # Timeout mínimo para falha rápida
+            retries: 0                      # Sem retry
+            delivery.timeout.ms: 100
+            request.timeout.ms: 50
+            enable.idempotence: false 
+                  # Idempotência desligada para teste
+
+my:
+  scheduler:
+    delay: 10000
+
+channel: publishReportRequestTest-out-0
 
 resilience4j:
   circuitbreaker:
     instances:
       myCircuitBreaker:
         registerHealthIndicator: true
-        slidingWindowSize: 5
-        minimumNumberOfCalls: 3
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
         failureRateThreshold: 50
-        waitDurationInOpenState: 5s
+        waitDurationInOpenState: 1s
 
       publish-kafka:
         registerHealthIndicator: true
-        slidingWindowSize: 5
-        minimumNumberOfCalls: 3
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
         failureRateThreshold: 50
-        waitDurationInOpenState: 5s
+        waitDurationInOpenState: 1s
 
   retry:
     instances:
       myRetry:
-        maxAttempts: 2
-        waitDuration: 500ms
+        maxAttempts: 1
+        waitDuration: 1s
 
   ratelimiter:
     instances:
       myRateLimiter:
-        limitForPeriod: 10
-        limitRefreshPeriod: 5s
-        timeoutDuration: 500ms
+        limitForPeriod: 1
+        limitRefreshPeriod: 1s
+        timeoutDuration: 1s
+
