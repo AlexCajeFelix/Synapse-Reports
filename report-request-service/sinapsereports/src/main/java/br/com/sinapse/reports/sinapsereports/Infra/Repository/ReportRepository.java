@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 
 public interface ReportRepository extends JpaRepository<ReportRequest, UUID> {
 

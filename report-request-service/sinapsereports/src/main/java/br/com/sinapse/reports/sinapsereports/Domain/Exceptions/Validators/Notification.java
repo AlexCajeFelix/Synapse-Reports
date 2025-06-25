@@ -29,7 +29,7 @@ public class Notification<T> {
 
     public String messagesAsString() {
         return anErrors.stream()
-                .map(Error::getMessage)
+                .map(Error::getError)
                 .collect(Collectors.joining("; "));
     }
 }

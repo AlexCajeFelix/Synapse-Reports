@@ -5,8 +5,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.GetReportUseCase;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.GetReportException;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 
 @Service

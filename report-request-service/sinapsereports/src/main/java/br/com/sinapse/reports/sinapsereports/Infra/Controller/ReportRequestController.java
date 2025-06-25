@@ -14,7 +14,7 @@ import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestRespo
 import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.CreateReportUseCase;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.GetReportUseCase;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController

@@ -10,7 +10,7 @@ import java.util.UUID;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

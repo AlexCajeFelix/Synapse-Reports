@@ -3,7 +3,7 @@ package br.com.sinapse.reports.sinapsereports.Application.Mappers; // Sugestão 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEvent;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 
 import org.springframework.stereotype.Component;
 

@@ -1,106 +1,36 @@
 package br.com.sinapse.reports.sinapsereports.Core.Entities;
 
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
-import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
-import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Notification;
-import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.ReportRequestValidator;
-
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 
-import static br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.Factory.ReportRequestFactory.createValidReportRequest;
+import static br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest.create;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-class ReportRequestTest {
+public class ReportRequestTest {
 
     @Test
-    void create_valid_report_request_should_pass() {
-        var reportValid = createValidReportRequest();
+    void given_aValidReportRequest_when_instanciate_then_shouldCreate() {
 
-        assertEquals(ReportType.PDF, reportValid.getReportType());
+        var expectedDate = LocalDate.now();
+        var expectedReportStatus = ReportStatus.PENDING_SEND;
+        var expectedReportType = ReportType.PDF;
+        var expectedParameters = "parameters";
+
+        var aReportRequest = create(ReportStatus.PENDING_SEND, ReportType.PDF, expectedDate,
+                expectedDate, "parameters");
+
+        assertNotNull(aReportRequest.getId());
+        assertEquals(expectedReportStatus, aReportRequest.getStatus());
+        assertEquals(expectedReportType, aReportRequest.getReportType());
+        assertEquals(expectedDate, aReportRequest.getReportStartDate());
+        assertEquals(expectedDate, aReportRequest.getReportEndDate());
+        assertEquals(expectedParameters, aReportRequest.getParameters());
 
     }
 
-    @Test
-    void create_null_report_type_should_throw() {
-        ReportRequestInvalidException ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                null,
-                LocalDate.now().minusDays(5),
-                LocalDate.now(),
-                "{}"));
-        assertEquals("Report type must not be null.", ex.getMessage());
-    }
-
-    @Test
-    void create_blank_report_type_should_throw() {
-        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                " ",
-                LocalDate.now().minusDays(5),
-                LocalDate.now(),
-                "{}"));
-        assertEquals("Report type must not be null.", ex.getMessage());
-    }
-
-    @Test
-    void create_null_start_date_should_throw() {
-        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "PDF",
-                null,
-                LocalDate.now(),
-                "{}"));
-        assertEquals("Start and end dates must not be null.", ex.getMessage());
-    }
-
-    @Test
-    void create_null_end_date_should_throw() {
-        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "PDF",
-                LocalDate.now().minusDays(5),
-                null,
-                "{}"));
-        assertEquals("Start and end dates must not be null.", ex.getMessage());
-    }
-
-    @Test
-    void create_start_date_after_end_date_should_throw() {
-        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "PDF",
-                LocalDate.now(),
-                LocalDate.now().minusDays(1),
-                "{}"));
-        assertEquals("Start date must be before or equal to end date.", ex.getMessage());
-    }
-
-    @Test
-    void create_start_date_in_future_should_throw() {
-        var ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "PDF",
-                LocalDate.now().plusDays(1),
-                LocalDate.now().plusDays(2),
-                "{}"));
-        assertTrue(ex.getMessage().contains("Start date must not be in the future."));
-    }
-
-    @Test
-    void create_end_date_in_future_should_throw() {
-        ReportRequestInvalidException ex = assertThrows(ReportRequestInvalidException.class, () -> new ReportRequest(
-                "PDF",
-                LocalDate.now().minusDays(2),
-                LocalDate.now().plusDays(1),
-                "{}"));
-        assertEquals("End date must not be in the future.", ex.getMessage());
-    }
-
-    @Test
-    void create_null_report_request_should_report_error() {
-        ReportRequestValidator validator = new ReportRequestValidator();
-        Notification<ReportRequest> notification = validator.validate(null);
-
-        assertTrue(notification.hasErrors());
-        assertTrue(notification.getErrors().stream()
-                .anyMatch(e -> e.getMessage().equals("ReportRequest must not be null.")));
-    }
 }

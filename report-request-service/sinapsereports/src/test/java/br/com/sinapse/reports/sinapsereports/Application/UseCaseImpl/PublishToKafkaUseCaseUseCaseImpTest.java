@@ -17,8 +17,8 @@ import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEve
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.Fallback.FallBackPublishToKafkaUseCaseUseCaseImp;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 import static br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.Factory.ReportRequestFactory.createValidReportRequest;
 

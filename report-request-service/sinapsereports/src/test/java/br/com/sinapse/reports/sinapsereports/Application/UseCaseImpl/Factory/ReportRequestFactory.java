@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 
 public class ReportRequestFactory {
 

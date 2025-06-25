@@ -12,8 +12,8 @@ import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.CreateReportUseCase;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 
 @Service
 public class CreateReportUseCaseImpl extends CreateReportUseCase {
