@@ -1,24 +1,17 @@
 package br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators;
 
-public abstract class AbstractValidator<T> implements Validator<T> {
+public abstract class AbstractValidator {
 
-    protected Notification<T> notification;
+    protected final ValidatorHandler handler;
 
-    protected AbstractValidator() {
-        this.notification = new Notification<>();
+    public AbstractValidator(ValidatorHandler aHandler) {
+        this.handler = aHandler;
     }
 
-    protected void addError(String message) {
-        this.notification.addError(message);
-    }
+    public abstract void validate();
 
-    @Override
-    public Notification<T> validate(T target) {
-        this.notification = new Notification<>();
-        this.doValidate(target);
-        return notification;
+    protected ValidatorHandler validatorHandler() {
+        return this.handler;
     }
-
-    protected abstract void doValidate(T target);
 
 }

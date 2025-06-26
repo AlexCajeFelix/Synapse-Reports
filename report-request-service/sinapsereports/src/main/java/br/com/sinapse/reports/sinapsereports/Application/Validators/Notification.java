@@ -1,8 +1,10 @@
-package br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators;
+package br.com.sinapse.reports.sinapsereports.Application.Validators;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Error;
 
 public class Notification<T> {
 
@@ -29,7 +31,7 @@ public class Notification<T> {
 
     public String messagesAsString() {
         return anErrors.stream()
-                .map(Error::getMessage)
+                .map(Error::getError)
                 .collect(Collectors.joining("; "));
     }
 }

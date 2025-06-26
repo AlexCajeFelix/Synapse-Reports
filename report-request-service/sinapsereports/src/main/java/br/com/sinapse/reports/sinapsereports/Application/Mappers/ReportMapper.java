@@ -3,7 +3,7 @@ package br.com.sinapse.reports.sinapsereports.Application.Mappers; // Sugestão 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEvent;
-import br.com.sinapse.reports.sinapsereports.Domain.Entities.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 
 import org.springframework.stereotype.Component;
 
@@ -14,12 +14,7 @@ public class ReportMapper {
         if (dto == null) {
             return null;
         }
-        ReportRequest entity = new ReportRequest(
-                dto.reportType(),
-                dto.reportStartDate(),
-                dto.reportEndDate(),
-                dto.parameters());
-        return entity;
+        return ReportRequest.create(dto.reportType(), dto.reportStartDate(), dto.reportEndDate(), dto.parameters());
 
     }
 
