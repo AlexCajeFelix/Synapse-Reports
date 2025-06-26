@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportType;
 
 public class ReportRequestFactory {
 

@@ -1,12 +1,13 @@
 package br.com.sinapse.reports.sinapsereports.Domain.Report;
 
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.AgregateRoot;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ThrowsValidatorHandler;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Error;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorHandler;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.RequestReportValidator;
-
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportType;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -35,9 +36,17 @@ public class ReportRequest extends AgregateRoot<ReportRequestID> {
         this.parameters = parameters;
     }
 
-    public static ReportRequest create(ReportStatus status, ReportType reportType,
+    public static ReportRequest create(String status, String reportType,
             LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
-        var reportRequest = new ReportRequest(status, reportType, reportStartDate, reportEndDate, parameters);
+        var reportRequest = new ReportRequest(
+                ReportStatus.from(status).orElseThrow(
+                        () -> ReportRequestInvalidException.create(new Error("Status do relatorio invalido"))),
+                ReportType.from(reportType)
+                        .orElseThrow(
+                                () -> ReportRequestInvalidException.create(new Error("Tipo do relatorio invalido"))),
+                reportStartDate,
+                reportEndDate,
+                parameters);
 
         reportRequest.validate(new ThrowsValidatorHandler());
         return reportRequest;
@@ -75,6 +84,11 @@ public class ReportRequest extends AgregateRoot<ReportRequestID> {
     @Override
     public void validate(ValidatorHandler handler) {
         new RequestReportValidator(handler, this).validate();
+    }
+
+    public void updateStatus(String status) {
+        this.status = ReportStatus.from(status)
+                .orElseThrow(() -> ReportRequestInvalidException.create(new Error("Status do relatorio invalido")));
     }
 
 }

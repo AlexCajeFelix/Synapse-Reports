@@ -3,8 +3,8 @@ package br.com.sinapse.reports.sinapsereports.Factory;
 import java.time.LocalDate;
 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ReportRequestInvalidException;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportType;
 
 public class CreateRequestDtoFactory {
 

@@ -14,12 +14,7 @@ public class ReportMapper {
         if (dto == null) {
             return null;
         }
-        ReportRequest entity = new ReportRequest(
-                dto.reportType(),
-                dto.reportStartDate(),
-                dto.reportEndDate(),
-                dto.parameters());
-        return entity;
+        return ReportRequest.create(dto.reportType(), dto.reportStartDate(), dto.reportEndDate(), dto.parameters());
 
     }
 

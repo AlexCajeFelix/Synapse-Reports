@@ -14,11 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.test.util.ReflectionTestUtils;
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestedEvent;
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.Fallback.FallBackPublishToKafkaUseCaseUseCaseImp;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 import static br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.Factory.ReportRequestFactory.createValidReportRequest;
 

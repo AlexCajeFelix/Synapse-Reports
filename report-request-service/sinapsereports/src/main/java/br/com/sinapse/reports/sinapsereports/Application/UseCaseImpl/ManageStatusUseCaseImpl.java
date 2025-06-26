@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.ManageStatusUseCase;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 
 @Service

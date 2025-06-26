@@ -8,12 +8,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.ReportRequestResponseDto;
-import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.CreateReportUseCase;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
 
 @Service
 public class CreateReportUseCaseImpl extends CreateReportUseCase {
