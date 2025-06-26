@@ -3,6 +3,7 @@ package br.com.sinapse.reports.sinapsereports.Domain.Report;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Application.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.AgregateRoot;
+import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.ThrowsValidatorHandler;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorHandler;
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.ValidatorsRules.RequestReportValidator;
 
@@ -36,7 +37,11 @@ public class ReportRequest extends AgregateRoot<ReportRequestID> {
 
     public static ReportRequest create(ReportStatus status, ReportType reportType,
             LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
-        return new ReportRequest(status, reportType, reportStartDate, reportEndDate, parameters);
+        var reportRequest = new ReportRequest(status, reportType, reportStartDate, reportEndDate, parameters);
+
+        reportRequest.validate(new ThrowsValidatorHandler());
+        return reportRequest;
+
     }
 
     public ReportRequestID getId() {

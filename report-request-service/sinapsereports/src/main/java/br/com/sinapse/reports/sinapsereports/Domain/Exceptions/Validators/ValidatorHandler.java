@@ -2,8 +2,6 @@ package br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators;
 
 import java.util.List;
 
-import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Error;
-
 public interface ValidatorHandler {
 
     ValidatorHandler append(Error anError);
