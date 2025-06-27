@@ -24,6 +24,7 @@ public class CreateReportGatewayImpl implements ReportCommandGateway {
         if (result == null) {
             throw new RuntimeException("Erro ao salvar report");
         }
+
         return reportRequest;
     }
 

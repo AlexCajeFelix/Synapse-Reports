@@ -17,9 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
+import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Gateway.ReportCommandGateway;
@@ -30,12 +32,14 @@ public class CreateReportUseCaseImplTest {
     @Mock
     private ReportCommandGateway reportCommandGateway;
 
+    @Mock
+    private PublishToKafkaUseCase publishToKafkaUseCase;
+
     @InjectMocks
     private CreateReportUseCaseImpl createReportUseCaseImpl;
 
     @Test
-    void given_validReport_when_create_then_return_report() {
-
+    void given_validReport_when_create_then_return_report_and_publishToKafka() {
         var expectedType = ReportType.PDF;
         var expectedStatus = ReportStatus.PENDING_SEND;
         var expectedDate = LocalDate.now();
@@ -57,6 +61,8 @@ public class CreateReportUseCaseImplTest {
 
         when(reportCommandGateway.create(any())).thenReturn(createdReport);
 
+        doAnswer(invocation -> null).when(publishToKafkaUseCase).execute(any());
+
         var report = createReportUseCaseImpl.execute(dto).join();
 
         assertNotNull(report);
@@ -66,6 +72,8 @@ public class CreateReportUseCaseImplTest {
         assertEquals(expectedType, report.getReportType());
         assertEquals(expectedDate, report.getReportStartDate());
         assertEquals(expectedDate, report.getReportEndDate());
+
+        org.mockito.Mockito.verify(publishToKafkaUseCase).execute(any());
     }
 
     @Test
@@ -128,4 +136,38 @@ public class CreateReportUseCaseImplTest {
         assertTrue(thrown.getCause() instanceof IllegalStateException);
 
     }
+
+    @Test
+    void given_validReport_when_kafkaPublishFails_then_exceptionIsThrown() {
+        var dto = new CreateReportRequestDto(
+                ReportStatus.PENDING_SEND.name(),
+                ReportType.PDF.name(),
+                LocalDate.now(),
+                LocalDate.now(),
+                "parameters");
+
+        var createdReport = create(
+                ReportStatus.PENDING_SEND.name(),
+                ReportType.PDF.name(),
+                LocalDate.now(),
+                LocalDate.now(),
+                "parameters");
+
+        when(reportCommandGateway.create(any())).thenReturn(createdReport);
+
+        doThrow(new RuntimeException("Kafka error")).when(publishToKafkaUseCase).execute(any());
+
+        var thrown = assertThrows(CompletionException.class, () -> {
+            createReportUseCaseImpl.execute(dto)
+                    .thenApply(report -> {
+                        publishToKafkaUseCase.execute(report);
+                        return report;
+                    }).join();
+        });
+
+        assertNotNull(thrown.getCause());
+        assertTrue(thrown.getCause() instanceof RuntimeException);
+        assertEquals("Kafka error", thrown.getCause().getMessage());
+    }
+
 }

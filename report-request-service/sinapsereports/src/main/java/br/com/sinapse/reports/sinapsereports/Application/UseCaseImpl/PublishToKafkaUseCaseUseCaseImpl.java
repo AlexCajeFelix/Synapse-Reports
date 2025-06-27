@@ -1,5 +1,8 @@
 package br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl;
 
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.stereotype.Service;
 
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
@@ -16,7 +19,11 @@ public class PublishToKafkaUseCaseUseCaseImpl extends PublishToKafkaUseCase {
 
     @Override
     public void execute(ReportRequest report) {
-        publishReportCommandGateway.publishReport(report);
+        Objects.requireNonNull(report, "Objeto nao pode ser nulo");
+        CompletableFuture.runAsync(() -> {
+            publishReportCommandGateway.publishReport(report);
+        });
+
     }
 
 }
