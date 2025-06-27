@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import br.com.sinapse.reports.sinapsereports.Application.UseCaseImpl.ManageStatusUseCaseImpl;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.Infra.Repository.ReportRepository;
 
 @Component
 public class FallBackPublishToKafkaUseCaseUseCaseImp {
@@ -18,8 +17,7 @@ public class FallBackPublishToKafkaUseCaseUseCaseImp {
 
     private static final Logger log = LoggerFactory.getLogger(FallBackPublishToKafkaUseCaseUseCaseImp.class);
 
-    public FallBackPublishToKafkaUseCaseUseCaseImp(final ManageStatusUseCaseImpl manageStatusUseCase,
-            final ReportRepository reportRepository) {
+    public FallBackPublishToKafkaUseCaseUseCaseImp(final ManageStatusUseCaseImpl manageStatusUseCase) {
         this.manageStatusUseCase = manageStatusUseCase;
 
     }

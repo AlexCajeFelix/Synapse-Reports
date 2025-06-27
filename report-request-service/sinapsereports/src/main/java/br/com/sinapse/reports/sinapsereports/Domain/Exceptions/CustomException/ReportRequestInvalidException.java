@@ -1,6 +1,7 @@
 package br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException;
 
 import java.util.List;
+
 import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.Validators.Error;
 
 public class ReportRequestInvalidException extends NoStackTraceException {

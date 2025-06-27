@@ -25,7 +25,10 @@ public class ReportRequestTest {
         var aReportRequest = create(ReportStatus.PENDING_SEND.name(), ReportType.PDF.name(), expectedDate,
                 expectedDate, "parameters");
 
+        var expectedId = aReportRequest.getId().getValue();
+
         assertNotNull(aReportRequest.getId());
+        assertEquals(expectedId, aReportRequest.getId().getValue());
         assertEquals(expectedReportStatus, aReportRequest.getStatus());
         assertEquals(expectedReportType, aReportRequest.getReportType());
         assertEquals(expectedDate, aReportRequest.getReportStartDate());
