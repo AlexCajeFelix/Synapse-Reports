@@ -21,16 +21,12 @@ import br.com.sinapse.reports.sinapsereports.Domain.Exceptions.CustomException.M
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportType;
-import br.com.sinapse.reports.sinapsereports.Infra.Fallback.FallBackPublishToKafkaUseCaseUseCaseImp;
 
 @ExtendWith(MockitoExtension.class)
 public class PublishToKafkaGatewayImplTest {
 
     @Mock
     private StreamBridge streamBridge;
-
-    @Mock
-    private FallBackPublishToKafkaUseCaseUseCaseImp fallbackUseCase;
 
     @InjectMocks
     private PublishToKafkaGatewayimpl publishGateway;
