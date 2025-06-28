@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import br.com.sinapse.reports.sinapsereports.Application.Dtos.CreateReportRequestDto;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.CreateReportUseCase;
+import br.com.sinapse.reports.sinapsereports.Application.UseCase.ManageStatusUseCase;
 import br.com.sinapse.reports.sinapsereports.Application.UseCase.PublishToKafkaUseCase;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Gateway.ReportCommandGateway;
 import lombok.var;
 
@@ -15,8 +17,9 @@ import lombok.var;
 public class CreateReportUseCaseImpl extends CreateReportUseCase {
 
     public CreateReportUseCaseImpl(ReportCommandGateway reportCommandGateway,
-            PublishToKafkaUseCase publishToKafkaUseCase) {
-        super(reportCommandGateway, publishToKafkaUseCase);
+            PublishToKafkaUseCase publishToKafkaUseCase, ManageStatusUseCase manageStatusUseCase) {
+        super(reportCommandGateway, publishToKafkaUseCase, manageStatusUseCase);
+
     }
 
     @Override
@@ -38,6 +41,8 @@ public class CreateReportUseCaseImpl extends CreateReportUseCase {
             }
 
             publishToKafkaUseCase.execute(savedReport);
+
+            manageStatusUseCase.execute(savedReport, ReportStatus.PENDING);
 
             return savedReport;
         });

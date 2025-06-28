@@ -14,9 +14,11 @@ public class ManageStatusUseCaseImpl extends ManageStatusUseCase {
     }
 
     @Override
-    public void execute(ReportRequest input1, ReportStatus input2) {
+    public void execute(ReportRequest report, ReportStatus status) {
 
-        reportCommandGateway.update(input1, input2);
+        report.updateStatus(status.name());
+
+        reportCommandGateway.update(report, status);
 
     }
 

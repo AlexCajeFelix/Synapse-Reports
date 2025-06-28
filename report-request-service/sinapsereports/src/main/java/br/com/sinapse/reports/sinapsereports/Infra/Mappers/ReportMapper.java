@@ -1,6 +1,9 @@
 package br.com.sinapse.reports.sinapsereports.Infra.Mappers;
 
 import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequestID;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportStatus;
+import br.com.sinapse.reports.sinapsereports.Domain.Report.Enum.ReportType;
 import br.com.sinapse.reports.sinapsereports.Infra.Persistence.EntitiesJpa.ReportRequestEntity;
 
 public class ReportMapper {
@@ -19,11 +22,14 @@ public class ReportMapper {
     }
 
     public static ReportRequest toDomain(ReportRequestEntity entity) {
-        return ReportRequest.create(
-                entity.getStatus(),
-                entity.getReportType(),
+        return ReportRequest.with(
+                ReportRequestID.from(entity.getId()),
+                ReportStatus.from(entity.getStatus()).orElseThrow(),
+                ReportType.from(entity.getReportType()).orElseThrow(),
+                entity.getRequestedAt(),
                 entity.getReportStartDate(),
                 entity.getReportEndDate(),
                 entity.getParameters());
     }
+
 }

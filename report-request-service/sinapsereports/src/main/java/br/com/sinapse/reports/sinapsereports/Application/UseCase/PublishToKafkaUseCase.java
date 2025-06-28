@@ -8,8 +8,12 @@ public abstract class PublishToKafkaUseCase extends InputNoOutputUseCase<ReportR
 
     protected final PublishReportCommandGateway publishReportCommandGateway;
 
-    public PublishToKafkaUseCase(PublishReportCommandGateway publishReportCommandGateway) {
+    protected final ManageStatusUseCase manageStatusUseCase;
+
+    public PublishToKafkaUseCase(PublishReportCommandGateway publishReportCommandGateway,
+            ManageStatusUseCase manageStatusUseCase) {
         this.publishReportCommandGateway = publishReportCommandGateway;
+        this.manageStatusUseCase = manageStatusUseCase;
     }
 
 }

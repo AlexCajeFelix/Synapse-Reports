@@ -30,13 +30,16 @@ public class CreateReportGatewayImpl implements ReportCommandGateway {
 
     @Override
     public ReportRequest findByID(UUID id) {
-
-        return null;
+        return reportRepositoryJpa.findById(id).map(ReportMapper::toDomain).orElse(null);
     }
 
     @Override
     public void update(ReportRequest reportRequest, ReportStatus status) {
-        reportRequest.updateStatus(status.name());
+        var entityJpa = ReportMapper.toEntity(reportRequest);
+        var result = reportRepositoryJpa.save(entityJpa);
+        if (result == null) {
+            throw new RuntimeException("Erro ao salvar report");
+        }
 
     }
 

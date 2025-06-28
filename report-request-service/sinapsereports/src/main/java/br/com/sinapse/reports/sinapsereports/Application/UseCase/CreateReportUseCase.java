@@ -11,9 +11,12 @@ public abstract class CreateReportUseCase
         extends InputOutputUseCase<CreateReportRequestDto, CompletableFuture<ReportRequest>> {
 
     protected final ReportCommandGateway reportCommandGateway;
-    protected PublishToKafkaUseCase publishToKafkaUseCase;
+    protected final PublishToKafkaUseCase publishToKafkaUseCase;
+    protected final ManageStatusUseCase manageStatusUseCase;
 
-    public CreateReportUseCase(ReportCommandGateway reportUseCase, PublishToKafkaUseCase publishToKafkaUseCase) {
+    public CreateReportUseCase(ReportCommandGateway reportUseCase, PublishToKafkaUseCase publishToKafkaUseCase,
+            ManageStatusUseCase manageStatusUseCase) {
+        this.manageStatusUseCase = manageStatusUseCase;
         this.publishToKafkaUseCase = publishToKafkaUseCase;
         this.reportCommandGateway = reportUseCase;
     }
