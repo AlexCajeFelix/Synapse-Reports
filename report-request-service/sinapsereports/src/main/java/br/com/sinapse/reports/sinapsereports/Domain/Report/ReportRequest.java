@@ -25,6 +25,36 @@ public class ReportRequest extends AgregateRoot<ReportRequestID> {
 
     private String parameters;
 
+    private ReportRequest(ReportRequestID id, ReportStatus status, ReportType reportType, Instant requestedAt,
+            LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
+        super(id);
+        this.status = status;
+        this.reportType = reportType;
+        this.requestedAt = requestedAt;
+        this.reportStartDate = reportStartDate;
+        this.reportEndDate = reportEndDate;
+        this.parameters = parameters;
+    }
+
+    public static ReportRequest with(
+            ReportRequestID id,
+            ReportStatus status,
+            ReportType reportType,
+            Instant requestedAt,
+            LocalDate reportStartDate,
+            LocalDate reportEndDate,
+            String parameters) {
+
+        return new ReportRequest(
+                id,
+                status,
+                reportType,
+                requestedAt,
+                reportStartDate,
+                reportEndDate,
+                parameters);
+    }
+
     private ReportRequest(ReportStatus status, ReportType reportType,
             LocalDate reportStartDate, LocalDate reportEndDate, String parameters) {
         super(ReportRequestID.createRandomID());

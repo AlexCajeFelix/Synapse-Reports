@@ -18,4 +18,8 @@ public class ReportRequestID extends Identifier<UUID> {
         return new ReportRequestID();
     }
 
+    public static ReportRequestID from(UUID id) {
+        return new ReportRequestID(id);
+    }
+
 }
