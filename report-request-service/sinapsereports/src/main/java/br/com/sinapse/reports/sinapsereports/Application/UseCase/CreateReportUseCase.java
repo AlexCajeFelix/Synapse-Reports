@@ -8,7 +8,7 @@ import br.com.sinapse.reports.sinapsereports.Domain.Report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.Domain.Report.Gateway.ReportCommandGateway;
 
 public abstract class CreateReportUseCase
-        extends InputOutputUseCase<CreateReportRequestDto, CompletableFuture<ReportRequest>> {
+        extends InputOutputUseCase<CreateReportRequestDto, ReportRequest> {
 
     protected final ReportCommandGateway reportCommandGateway;
     protected final PublishToKafkaUseCase publishToKafkaUseCase;

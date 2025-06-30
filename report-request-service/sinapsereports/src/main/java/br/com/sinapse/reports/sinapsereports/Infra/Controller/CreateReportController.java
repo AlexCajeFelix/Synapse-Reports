@@ -7,9 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
 @RestController
 @RequestMapping("/reports")
 public class CreateReportController {
@@ -21,11 +18,12 @@ public class CreateReportController {
     }
 
     @PostMapping
-    public CompletableFuture<ResponseEntity<ReportRequest>> createReport(
+    public ResponseEntity<ReportRequest> createReport(
             @Valid @RequestBody CreateReportRequestDto requestDto) {
+        var request = createReportUseCase.execute(requestDto);
 
-        return createReportUseCase.execute(requestDto)
-                .thenApply(ResponseEntity::ok);
+        return ResponseEntity.accepted().body(request);
+
     }
 
 }
