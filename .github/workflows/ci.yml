@@ -53,5 +53,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
+
       - name: 🔨 Build com Maven
         run: ./mvnw clean verify -Dspring.profiles.active=test
