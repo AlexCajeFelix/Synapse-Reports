@@ -11,6 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
+      zookeeper:
+        image: bitnami/zookeeper:latest
+        ports:
+          - 2181:2181
+        env:
+          ALLOW_ANONYMOUS_LOGIN: "yes"
+        options: >-
+          --health-cmd "echo ruok | nc localhost 2181 | grep imok"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
       kafka:
         image: bitnami/kafka:latest
         ports:
@@ -20,18 +32,9 @@ jobs:
           KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
           KAFKA_CFG_LISTENERS: PLAINTEXT://:9093
           KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
+          ALLOW_PLAINTEXT_LISTENER: "yes"
         options: >-
           --health-cmd "curl -f localhost:9093 || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      zookeeper:
-        image: bitnami/zookeeper:latest
-        ports:
-          - 2181:2181
-        options: >-
-          --health-cmd "echo ruok | nc localhost 2181 | grep imok"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -53,6 +56,5 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-
-      - name: 🔨 Build com Maven
+      - name: 🔨 Build com Maven + Perfil de Teste
         run: ./mvnw clean verify -Dspring.profiles.active=test
