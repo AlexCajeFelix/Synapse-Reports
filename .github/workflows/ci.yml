@@ -28,4 +28,5 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-
 
       - name: 🔨 Build com Maven + Perfil de Teste
+        working-directory: ./report-request-service/sinapsereports
         run: ./mvnw clean verify -Dspring.profiles.active=test
