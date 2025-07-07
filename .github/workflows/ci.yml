@@ -26,7 +26,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      - name: 🔨 Build com Maven + Perfil de Teste
+      - name: 🔨 Build com Maven + Perfil de Teste - rodando test
         working-directory: ./report-request-service/sinapsereports
         run: ./mvnw clean verify -Dspring.profiles.active=test
         run: mvn test
+        
