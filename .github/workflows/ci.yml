@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: 📥 Checkout do código
         uses: actions/checkout@v4
@@ -30,3 +29,4 @@ jobs:
       - name: 🔨 Build com Maven + Perfil de Teste
         working-directory: ./report-request-service/sinapsereports
         run: ./mvnw clean verify -Dspring.profiles.active=test
+        run: mvn test
