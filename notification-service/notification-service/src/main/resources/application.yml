@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: notification-service
+
+server:
+  port: 8085
+
+  cloud:
+    stream:
+      defaultBinder: rabbitmq
+      binders:
+        rabbitmq:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: rabbitmq
+                port: 5672
+
+
+      bindings:
+        consumir-in-0:
+          destination: enviarlinkdownload-exchange
+          group: report-generate-group
+          binder: rabbitmq
+          content-type: application/json
+          consumer:
+            exchangeType: fanout
+
+    rabbit:
+      bindings:
+        consumir-in-0:
+          consumer:
+            queueName: fila-1    # aqui nome da fila customizada
+            durable: true
+reports:
+  storage:
+    path: /application/downloads

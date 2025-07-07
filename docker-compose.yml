@@ -1,13 +1,65 @@
-
 services:
+
   nginx:
     image: nginx:latest
     container_name: nginx_gateway
     ports:
       - "81:80"
-    
+    networks:
+      - my_network
 
-    
+  spring_app_request:
+    build: report-request-service/sinapsereports/
+    container_name: spring_app_request
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql-request
+      - mysql-generate
+      - kafka
+      - rabbitmq
+    networks:
+      - my_network
+    volumes:
+      - ./report-request-service/sinapsereports:/app
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+
+
+  spring_app_generate:
+    build: report-generation-service/report-generate-service/
+    container_name: spring_app_generate
+    ports:
+      - "8089:8089"
+    depends_on:
+      - mysql-request
+      - mysql-generate
+      - kafka
+      - rabbitmq
+    networks:
+      - my_network
+    volumes:
+      - ./report-generation-service/report-generate-service:/app
+
+  spring_app_notification-service:
+    build: notification-service/notification-service/
+    container_name: spring_app_notification_service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - mysql-request
+      - mysql-generate
+      - kafka
+      - rabbitmq
+    networks:
+      - my_network
+    volumes:
+      - ./notification-service/notification-service:/app
+     
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
     container_name: zookeeper
@@ -15,8 +67,9 @@ services:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - my_network
 
-  # Kafka: O seu broker de mensagens
   kafka:
     image: confluentinc/cp-kafka:7.3.2
     container_name: kafka
@@ -27,23 +80,57 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 # Correto para os seus serviços rodando no host
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - my_network
 
-  # MySQL: O seu banco de dados
-  mysql:
+  mysql-request:
     image: mysql:8.0
-    container_name: mysql_db_sinapse
+    container_name: mysql_request
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root # Use senhas mais fortes em produção
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: sinapse_reports
-      MYSQL_USER: user # Ótimo! Usar um utilizador dedicado é uma boa prática.
-      MYSQL_PASSWORD: root # Use senhas mais fortes em produção
-  
+      MYSQL_USER: user
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data_request:/var/lib/mysql
+    networks:
+      - my_network
 
-# Definição dos volumes nomeados para persistência de dados
+  mysql-generate:
+    image: mysql:8.0
+    container_name: mysql_generate
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sinapse_reports_generated
+      MYSQL_USER: user
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data_generate:/var/lib/mysql
+    networks:
+      - my_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    
+      - "15672:15672"  
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - my_network
+
+networks:
+  my_network:
+
 volumes:
-  mysql_data:
+  mysql_data_request:
+  mysql_data_generate:
+  rabbitmq_data:

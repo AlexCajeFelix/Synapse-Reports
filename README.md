@@ -146,3 +146,4 @@ mvn clean verify
 ---
 
 > ✨ Projeto desenvolvido como referência para estudos de arquitetura de sistemas distribuídos, mensageria e resiliência assíncrona.
+

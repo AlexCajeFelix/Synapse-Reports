@@ -2,12 +2,18 @@ package br.com.sinapse.reports.sinapsereports;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-
+@EnableAsync(proxyTargetClass = true)
+@EnableScheduling
 public class SinapsereportsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SinapsereportsApplication.class, args);
+		SpringApplication app = new SpringApplication(SinapsereportsApplication.class);
+		app.setAdditionalProfiles("dev");
+		app.run(args);
 	}
+
 }
