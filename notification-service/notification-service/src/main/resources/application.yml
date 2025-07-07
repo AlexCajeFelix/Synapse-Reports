@@ -35,4 +35,4 @@ server:
             durable: true
 reports:
   storage:
-    path: /app/downloads
+    path: /application/downloads

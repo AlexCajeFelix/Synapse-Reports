@@ -1,12 +1,5 @@
-networks:
-  my_network:
-
-volumes:
-  mysql_data_request:
-  mysql_data_generate:
-  rabbitmq_data:
-
 services:
+
   nginx:
     image: nginx:latest
     container_name: nginx_gateway
@@ -28,7 +21,13 @@ services:
     networks:
       - my_network
     volumes:
-      - ./report-request-service/sinapsereports/:/app
+      - ./report-request-service/sinapsereports:/app
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+
 
   spring_app_generate:
     build: report-generation-service/report-generate-service/
@@ -43,7 +42,7 @@ services:
     networks:
       - my_network
     volumes:
-      - ./report-generation-service/report-generate-service/:/app
+      - ./report-generation-service/report-generate-service:/app
 
   spring_app_notification-service:
     build: notification-service/notification-service/
@@ -58,9 +57,8 @@ services:
     networks:
       - my_network
     volumes:
-      - ./notification-service/notification-service/:/app
-      - /home/alek/Desktop/Synapse Reports- back-end/report-generation-service/report-generate-service/downloads:/app/downloads:ro
-      # ^-- monta a pasta de downloads dentro do container em /app/downloads (só leitura)
+      - ./notification-service/notification-service:/app
+     
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -128,3 +126,11 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - my_network
+
+networks:
+  my_network:
+
+volumes:
+  mysql_data_request:
+  mysql_data_generate:
+  rabbitmq_data:

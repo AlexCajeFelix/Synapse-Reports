@@ -1,0 +1,57 @@
+name: CI - Testes e Build
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      kafka:
+        image: bitnami/kafka:latest
+        ports:
+          - 9093:9093
+        env:
+          KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9093
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
+        options: >-
+          --health-cmd "curl -f localhost:9093 || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      zookeeper:
+        image: bitnami/zookeeper:latest
+        ports:
+          - 2181:2181
+        options: >-
+          --health-cmd "echo ruok | nc localhost 2181 | grep imok"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: ☕️ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📦 Cache do Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: 🔨 Build com Maven
+        run: ./mvnw clean verify -Dspring.profiles.active=test
