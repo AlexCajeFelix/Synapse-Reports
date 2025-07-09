@@ -1,7 +1,7 @@
 package br.com.sinapse.reports.sinapsereports.infra.report.gatewayimpl;
 
 import br.com.sinapse.reports.sinapsereports.domain.report.enums.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception.MessagePublishingException;
+import br.com.sinapse.reports.sinapsereports.domain.shared.customexception.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.infra.report.fallback.FallbackGatewayImpl;
 import br.com.sinapse.reports.sinapsereports.infra.report.mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.infra.report.persistence.entitiesjpa.ReportRequestEntity;
@@ -64,7 +64,7 @@ class PublishToKafkaGatewayimplTest {
 
         MessagePublishingException ex = assertThrows(MessagePublishingException.class,
                 () -> gateway.publishReport(createdReport));
-        assertTrue(ex.getMessage().contains("Kafka não aceitou a mensagem"));
+        assertTrue(ex.getMessage().contains("Falha ao publicar no Kafka"));
     }
 
     @Test
@@ -117,7 +117,7 @@ class PublishToKafkaGatewayimplTest {
 
             MessagePublishingException ex = assertThrows(MessagePublishingException.class,
                     () -> gateway.resendPendingRequests());
-            assertTrue(ex.getMessage().contains("Kafka não aceitou a mensagem"));
+            assertTrue(ex.getMessage().contains("Falha ao publicar no Kafka"));
             verify(streamBridge).send("test-channel", domain);
         }
     }

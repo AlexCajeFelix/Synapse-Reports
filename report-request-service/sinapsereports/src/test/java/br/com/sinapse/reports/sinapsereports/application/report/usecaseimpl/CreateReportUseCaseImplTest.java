@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import br.com.sinapse.reports.sinapsereports.application.report.dtos.CreateReportRequestDto;
+
 import br.com.sinapse.reports.sinapsereports.application.report.usecase.PublishToKafkaUseCase;
 import br.com.sinapse.reports.sinapsereports.domain.report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.domain.report.gateway.ReportCommandGateway;
@@ -35,24 +36,29 @@ class CreateReportUseCaseImplTest {
 
         @Test
         void given_validReport_when_create_then_return_report_and_publishToKafka() {
-                var dto = new CreateReportRequestDto(
+
+                var createReporDTO = new CreateReportRequestDto(
                                 "PENDING_SEND", "PDF", LocalDate.now(), LocalDate.now(), "parameters");
 
-                var createdReport = create(
-                                "PENDING_SEND", "PDF", LocalDate.now(), LocalDate.now(), "parameters");
+                when(reportCommandGateway.create(any(ReportRequest.class)))
+                                .thenAnswer(invocation -> invocation.getArgument(0));
 
-                when(reportCommandGateway.create(any())).thenReturn(createdReport);
                 doNothing().when(publishToKafkaUseCase).execute(any());
 
-                var report = createReportUseCaseImpl.execute(dto);
+                var actualResponse = createReportUseCaseImpl.execute(createReporDTO);
 
-                assertNotNull(report);
-                assertNotNull(report.getId());
+                assertNotNull(actualResponse);
+                assertNotNull(actualResponse.reportId());
 
                 await().atMost(5, TimeUnit.SECONDS)
                                 .untilAsserted(() -> verify(publishToKafkaUseCase).execute(any()));
                 verify(reportCommandGateway, times(1)).create(any(ReportRequest.class));
                 verify(publishToKafkaUseCase, times(1)).execute(any(ReportRequest.class));
+
+                assertEquals(createReporDTO.reportType(), actualResponse.reportType().name());
+                assertEquals(createReporDTO.status(), actualResponse.status().name());
+                assertEquals("Seu report esta sendo processado", actualResponse.message());
+
         }
 
         @Test

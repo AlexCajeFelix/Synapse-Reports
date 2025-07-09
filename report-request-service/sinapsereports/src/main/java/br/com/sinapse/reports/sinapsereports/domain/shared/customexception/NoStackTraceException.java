@@ -1,4 +1,4 @@
-package br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception;
+package br.com.sinapse.reports.sinapsereports.domain.shared.customexception;
 
 public class NoStackTraceException extends RuntimeException {
 

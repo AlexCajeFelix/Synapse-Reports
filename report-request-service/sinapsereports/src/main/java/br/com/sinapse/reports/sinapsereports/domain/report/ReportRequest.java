@@ -2,15 +2,14 @@ package br.com.sinapse.reports.sinapsereports.domain.report;
 
 import java.time.Instant;
 import java.time.LocalDate;
-
+import br.com.sinapse.reports.sinapsereports.domain.report.Validator.RequestReportValidator;
 import br.com.sinapse.reports.sinapsereports.domain.report.enums.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.domain.report.enums.ReportType;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception.ReportRequestInvalidException;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception.ThrowsValidatorHandler;
 import br.com.sinapse.reports.sinapsereports.domain.shared.AgregateRoot;
+
+import br.com.sinapse.reports.sinapsereports.domain.shared.customexception.ReportRequestInvalidException;
 import br.com.sinapse.reports.sinapsereports.domain.shared.validators.Error;
-import br.com.sinapse.reports.sinapsereports.domain.shared.validators.ValidatorHandler;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.validators.validatorrules.RequestReportValidator;
+import br.com.sinapse.reports.sinapsereports.domain.shared.validators.Notification;
 
 public class ReportRequest extends AgregateRoot<ReportRequestID> {
 
@@ -79,7 +78,7 @@ public class ReportRequest extends AgregateRoot<ReportRequestID> {
                 reportEndDate,
                 parameters);
 
-        reportRequest.validate(new ThrowsValidatorHandler());
+        reportRequest.validate();
         return reportRequest;
 
     }
@@ -113,8 +112,13 @@ public class ReportRequest extends AgregateRoot<ReportRequestID> {
     }
 
     @Override
-    public void validate(ValidatorHandler handler) {
-        new RequestReportValidator(handler, this).validate();
+    public void validate() {
+        var notification = new Notification();
+        new RequestReportValidator(this, notification).validate();
+
+        if (notification.hasErrors()) {
+            throw ReportRequestInvalidException.create(notification.getErrors());
+        }
     }
 
     public void updateStatus(String status) {

@@ -1,7 +1,5 @@
 package br.com.sinapse.reports.sinapsereports.domain.shared;
 
-import br.com.sinapse.reports.sinapsereports.domain.shared.validators.ValidatorHandler;
-
 public abstract class Entity<ID extends Identifier<?>> {
 
     protected final ID id;
@@ -14,5 +12,5 @@ public abstract class Entity<ID extends Identifier<?>> {
         return id;
     }
 
-    public abstract void validate(ValidatorHandler handler);
+    public abstract void validate();
 }

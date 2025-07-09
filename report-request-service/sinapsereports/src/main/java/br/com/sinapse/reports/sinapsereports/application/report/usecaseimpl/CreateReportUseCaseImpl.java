@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.stereotype.Service;
 
 import br.com.sinapse.reports.sinapsereports.application.report.dtos.CreateReportRequestDto;
+import br.com.sinapse.reports.sinapsereports.application.report.dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.application.report.usecase.CreateReportUseCase;
 import br.com.sinapse.reports.sinapsereports.application.report.usecase.ManageStatusUseCase;
 import br.com.sinapse.reports.sinapsereports.application.report.usecase.PublishToKafkaUseCase;
@@ -29,7 +30,7 @@ public class CreateReportUseCaseImpl extends CreateReportUseCase {
     }
 
     @Override
-    public ReportRequest execute(CreateReportRequestDto aReportDto) {
+    public ReportRequestResponseDto execute(CreateReportRequestDto aReportDto) {
         Objects.requireNonNull(aReportDto, "Objeto não pode ser nulo");
         log.info("Thread principal: " + Thread.currentThread().getName());
 
@@ -40,6 +41,11 @@ public class CreateReportUseCaseImpl extends CreateReportUseCase {
                 aReportDto.reportEndDate(),
                 aReportDto.parameters());
         log.info("Pedido criado, pendente para envio");
+
+        var response = new ReportRequestResponseDto(aReport.getId().getValue().toString(),
+                aReport.getReportType(),
+                aReport.getStatus(),
+                "Seu report esta sendo processado");
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -54,7 +60,7 @@ public class CreateReportUseCaseImpl extends CreateReportUseCase {
             log.info("Status atualizado para PENDING_SEND");
         }, IO_EXECUTOR);
 
-        return aReport;
+        return response;
     }
 
 }

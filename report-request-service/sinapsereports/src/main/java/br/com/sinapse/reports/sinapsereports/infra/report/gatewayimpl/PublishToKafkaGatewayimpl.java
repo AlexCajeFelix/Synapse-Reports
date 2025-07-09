@@ -8,12 +8,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import br.com.sinapse.reports.sinapsereports.domain.report.ReportRequest;
 import br.com.sinapse.reports.sinapsereports.domain.report.enums.ReportStatus;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.domain.report.gateway.PublishReportCommandGateway;
+import br.com.sinapse.reports.sinapsereports.domain.shared.customexception.MessagePublishingException;
 import br.com.sinapse.reports.sinapsereports.infra.report.fallback.FallbackGatewayImpl;
 import br.com.sinapse.reports.sinapsereports.infra.report.mappers.ReportMapper;
 import br.com.sinapse.reports.sinapsereports.infra.report.persistence.repository.ReportRepositoryJpa;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import br.com.sinapse.reports.sinapsereports.domain.shared.validators.Error;
 
 @Service
 public class PublishToKafkaGatewayimpl implements PublishReportCommandGateway {
@@ -48,8 +49,7 @@ public class PublishToKafkaGatewayimpl implements PublishReportCommandGateway {
 
         boolean sent = aStreamBridge.send(channelName, reportRequest);
         if (!sent) {
-            throw new MessagePublishingException("Kafka não aceitou a mensagem: " +
-                    reportRequest.getId().getValue());
+            throw MessagePublishingException.create(new Error("Falha ao publicar no Kafka"));
         }
 
     }

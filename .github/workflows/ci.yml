@@ -29,5 +29,5 @@ jobs:
       - name: 🔨 Build com Maven + Perfil de Teste - rodando test
         working-directory: ./report-request-service/sinapsereports
         run: ./mvnw clean verify -Dspring.profiles.active=test
-        run: mvn test
+        
         

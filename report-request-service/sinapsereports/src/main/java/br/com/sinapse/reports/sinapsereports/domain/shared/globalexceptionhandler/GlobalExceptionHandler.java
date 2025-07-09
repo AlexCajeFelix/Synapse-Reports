@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import br.com.sinapse.reports.sinapsereports.application.report.dtos.error.ErrorResponseDTO;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception.ReportRequestInvalidException;
+import br.com.sinapse.reports.sinapsereports.domain.shared.customexception.ReportRequestInvalidException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;

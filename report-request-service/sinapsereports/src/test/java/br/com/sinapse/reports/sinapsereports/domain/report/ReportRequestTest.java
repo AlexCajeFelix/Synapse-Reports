@@ -6,12 +6,13 @@ import org.junit.jupiter.api.Test;
 
 import br.com.sinapse.reports.sinapsereports.domain.report.enums.ReportStatus;
 import br.com.sinapse.reports.sinapsereports.domain.report.enums.ReportType;
-import static br.com.sinapse.reports.sinapsereports.domain.report.ReportRequest.create;
-import br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception.ReportRequestInvalidException;
+import br.com.sinapse.reports.sinapsereports.domain.shared.customexception.ReportRequestInvalidException;
 
+import static br.com.sinapse.reports.sinapsereports.domain.report.ReportRequest.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReportRequestTest {
 
@@ -85,7 +86,7 @@ public class ReportRequestTest {
                         LocalDate.now(),
                         "parameters"));
 
-        assertEquals(expectedType, exception.getMessage());
+        assertTrue(exception.getMessage().contains(expectedType));
 
     }
 
@@ -118,16 +119,14 @@ public class ReportRequestTest {
     }
 
     @Test
-    void given_invalid_reportRequest_when_updateStatus_then_shouldThrowException() {
+    void given_invalid_reportRequest_when_create_then_shouldThrow_List_of_errors_Exception() {
 
-        var expectedStatus = "Status do relatorio invalido";
-        var actualReportRequest = create(ReportStatus.PENDING_SEND.name(), ReportType.PDF.name(), LocalDate.now(),
-                LocalDate.now(), "parameters");
+        var exception = assertThrows(ReportRequestInvalidException.class,
+                () -> create(ReportStatus.PENDING_SEND.name(), ReportType.PDF.name(), null,
+                        null, null));
 
-        var actualException = assertThrows(ReportRequestInvalidException.class,
-                () -> actualReportRequest.updateStatus("invalid status"));
-
-        assertEquals(expectedStatus, actualException.getMessage());
+        assertTrue(exception.getMessage().contains("A data de início não pode ser nula"));
+        assertTrue(exception.getMessage().contains("A data de fim não pode ser nula"));
 
     }
 

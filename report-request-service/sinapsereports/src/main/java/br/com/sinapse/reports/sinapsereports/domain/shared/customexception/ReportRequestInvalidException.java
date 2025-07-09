@@ -1,4 +1,4 @@
-package br.com.sinapse.reports.sinapsereports.domain.report.exceptions.customexception;
+package br.com.sinapse.reports.sinapsereports.domain.shared.customexception;
 
 import java.util.List;
 
@@ -18,8 +18,11 @@ public class ReportRequestInvalidException extends NoStackTraceException {
     }
 
     public static ReportRequestInvalidException create(final List<Error> errors) {
-        final String message = (errors != null && !errors.isEmpty())
-                ? errors.get(0).getError()
+        String message = (errors != null && !errors.isEmpty())
+                ? errors.stream()
+                        .map(Error::getError)
+                        .reduce((first, second) -> first + ", " + second)
+                        .orElse("Erro de validação")
                 : "Erro de validação";
         return new ReportRequestInvalidException(message, errors);
     }

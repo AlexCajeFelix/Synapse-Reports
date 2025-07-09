@@ -1,17 +1,15 @@
 package br.com.sinapse.reports.sinapsereports.domain.shared.validators;
 
-public abstract class AbstractValidator {
+public abstract class AbstractValidator<T> {
 
-    protected final ValidatorHandler handler;
+    protected final Notification notification;
+    protected final T entity;
 
-    public AbstractValidator(ValidatorHandler aHandler) {
-        this.handler = aHandler;
+    public AbstractValidator(T entity, Notification notification) {
+        this.notification = notification;
+        this.entity = entity;
     }
 
     public abstract void validate();
-
-    protected ValidatorHandler validatorHandler() {
-        return this.handler;
-    }
 
 }

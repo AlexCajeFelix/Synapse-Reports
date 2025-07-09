@@ -1,8 +1,8 @@
 package br.com.sinapse.reports.sinapsereports.infra.report.controller;
 
 import br.com.sinapse.reports.sinapsereports.application.report.dtos.CreateReportRequestDto;
+import br.com.sinapse.reports.sinapsereports.application.report.dtos.ReportRequestResponseDto;
 import br.com.sinapse.reports.sinapsereports.application.report.usecase.CreateReportUseCase;
-import br.com.sinapse.reports.sinapsereports.domain.report.ReportRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +17,7 @@ public class CreateReportController {
     }
 
     @PostMapping
-    public ResponseEntity<ReportRequest> createReport(
+    public ResponseEntity<ReportRequestResponseDto> createReport(
             @RequestBody CreateReportRequestDto requestDto) {
         var request = createReportUseCase.execute(requestDto);
 

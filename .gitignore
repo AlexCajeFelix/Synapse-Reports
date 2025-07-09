@@ -1,0 +1,7 @@
+.idea
+.vscode
+report-request-service/.idea
+report-request-service/sinapsereports/.idea
+report-request-service/sinapsereports/target
+report-request-service/sinapsereports/target/classes
+report-request-service/sinapsereports/target/test-classes
